@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -306,14 +306,14 @@
 
   <div class="kpi-row">
     <div class="kpi blue">
-      <div class="kpi-label">총 방문객 (에이전시)</div>
-      <div class="kpi-value blue">51,501</div>
-      <div class="kpi-sub">전체 기간 누적 <span>(에이전시 그룹)</span></div>
+      <div class="kpi-label">총 방문객 (에이전시+직접)</div>
+      <div class="kpi-value blue">55,850</div>
+      <div class="kpi-sub">에이전시 51,501 + 직접 <span>4,349</span></div>
     </div>
     <div class="kpi gold">
       <div class="kpi-label">총 예약 그룹 수</div>
-      <div class="kpi-value gold">259</div>
-      <div class="kpi-sub">그룹 건수 <span>(에이전시)</span></div>
+      <div class="kpi-value gold">283</div>
+      <div class="kpi-sub">에이전시 259건 + 직접 <span>24건</span></div>
     </div>
     <div class="kpi green">
       <div class="kpi-label">에이전시 수</div>
@@ -322,23 +322,23 @@
     </div>
     <div class="kpi purple">
       <div class="kpi-label">2026 누적 방문객</div>
-      <div class="kpi-value purple">15,167</div>
-      <div class="kpi-sub">~ 3월 기준 <span>(에이전시)</span></div>
+      <div class="kpi-value purple">19,516</div>
+      <div class="kpi-sub">에이전시 15,167 + 직접 <span>4,349</span></div>
     </div>
     <div class="kpi orange">
       <div class="kpi-label">직접 그룹 방문객</div>
-      <div class="kpi-value orange">4,862</div>
-      <div class="kpi-sub">2026년 누적 <span>(Direct)</span></div>
+      <div class="kpi-value orange">4,349</div>
+      <div class="kpi-sub">2026년 누적 <span>(Direct 24건)</span></div>
     </div>
   </div>
 
   <div class="stat-row">
+    <div class="stat-cell"><div class="stat-cell-label">에이전시 방문객</div><div class="stat-cell-val">51,501</div></div>
+    <div class="stat-cell"><div class="stat-cell-label">직접 방문객</div><div class="stat-cell-val" style="color:var(--orange)">4,349</div></div>
     <div class="stat-cell"><div class="stat-cell-label">2024 방문객</div><div class="stat-cell-val">3,945</div></div>
     <div class="stat-cell"><div class="stat-cell-label">2025 방문객</div><div class="stat-cell-val">32,389</div></div>
-    <div class="stat-cell"><div class="stat-cell-label">2026 방문객 (YTD)</div><div class="stat-cell-val" style="color:var(--accent2)">15,167</div></div>
-    <div class="stat-cell"><div class="stat-cell-label">YoY 성장 (2024→2025)</div><div class="stat-cell-val" style="color:var(--green)">+720%</div></div>
-    <div class="stat-cell"><div class="stat-cell-label">1위 에이전시</div><div class="stat-cell-val" style="color:var(--gold)">Happy Smile</div></div>
-    <div class="stat-cell"><div class="stat-cell-label">Happy Smile 점유율</div><div class="stat-cell-val" style="color:var(--gold)">46.6%</div></div>
+    <div class="stat-cell"><div class="stat-cell-label">2026 YTD (합산)</div><div class="stat-cell-val" style="color:var(--accent2)">19,516</div></div>
+    <div class="stat-cell"><div class="stat-cell-label">직접 그룹 비율</div><div class="stat-cell-val" style="color:var(--orange)">7.8%</div></div>
   </div>
 
   <div class="grid-3-2">
@@ -1177,10 +1177,10 @@ function renderDonut() {
   ctx.fillStyle = '#60a5fa';
   ctx.font = `bold ${fontSize}px JetBrains Mono`;
   ctx.textAlign = 'center';
-  ctx.fillText('51,501', cx, cy + 4);
+  ctx.fillText('55,850', cx, cy + 4);
   ctx.fillStyle = '#8899b0';
   ctx.font = `${Math.max(8, fontSize-3)}px Noto Sans KR`;
-  ctx.fillText('총 방문객', cx, cy + fontSize + 4);
+  ctx.fillText('에이전시+직접', cx, cy + fontSize + 4);
 
   const legend = document.getElementById('donut-legend');
   legend.innerHTML = items.map((item,i) => `
@@ -1211,6 +1211,11 @@ function renderYearlyChart() {
   groupListData.filter(g => g.year===2024).forEach(g => monthly2024[g.month-1] += g.total);
   groupListData.filter(g => g.year===2025).forEach(g => monthly2025[g.month-1] += g.total);
   groupListData.filter(g => g.year===2026).forEach(g => monthly2026[g.month-1] += g.total);
+  // 직접 그룹 합산 (2026년만 존재)
+  directData.forEach(g => {
+    const m = parseInt(g.dov.slice(5,7)) - 1;
+    monthly2026[m] += g.total;
+  });
 
   const pad = {l:42,r:12,t:24,b:28};
   const cW = W-pad.l-pad.r, cH = H-pad.t-pad.b;
@@ -1292,18 +1297,28 @@ function renderYearlyChart() {
 
 function renderTypeBars() {
   const types = {};
-  groupListData.forEach(g => { types[g.type] = (types[g.type]||0)+g.total; });
   const sectors = {};
-  groupListData.forEach(g => { sectors[g.sector] = (sectors[g.sector]||0)+g.total; });
+  // 에이전시 그룹
+  groupListData.forEach(g => {
+    types[g.type]   = (types[g.type]||0)   + g.total;
+    sectors[g.sector] = (sectors[g.sector]||0) + g.total;
+  });
+  // 직접 그룹 합산
+  directData.forEach(g => {
+    types[g.type]   = (types[g.type]||0)   + g.total;
+    sectors[g.sector] = (sectors[g.sector]||0) + g.total;
+  });
+
   const maxT = Math.max(...Object.values(types));
   const maxS = Math.max(...Object.values(sectors));
   const container = document.getElementById('type-bars');
-  container.innerHTML = '<div style="font-size:10px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px">그룹 유형</div>' +
+  container.innerHTML =
+    '<div style="font-size:10px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px">그룹 유형 <span style="color:var(--orange);font-size:9px">(에이전시+직접)</span></div>' +
     Object.entries(types).map(([k,v],i) => `<div class="bar-item">
       <div class="bar-label"><span class="bar-name">${k}</span><span class="bar-val">${v.toLocaleString()}</span></div>
       <div class="bar-track"><div class="bar-fill" style="width:${(v/maxT*100).toFixed(1)}%;background:${colors[i]}"></div></div>
     </div>`).join('') +
-    '<div style="font-size:10px;color:var(--text3);margin:12px 0 8px;text-transform:uppercase;letter-spacing:0.5px">섹터</div>' +
+    '<div style="font-size:10px;color:var(--text3);margin:12px 0 4px;text-transform:uppercase;letter-spacing:0.5px">섹터 <span style="color:var(--orange);font-size:9px">(에이전시+직접)</span></div>' +
     Object.entries(sectors).map(([k,v],i) => `<div class="bar-item">
       <div class="bar-label"><span class="bar-name">${k}</span><span class="bar-val">${v.toLocaleString()}</span></div>
       <div class="bar-track"><div class="bar-fill" style="width:${(v/maxS*100).toFixed(1)}%;background:${colors[i+3]}"></div></div>
