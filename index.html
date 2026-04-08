@@ -1,0 +1,2163 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KidZania Hanoi · Group Sales Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --bg2: #0f1528;
+    --bg3: #141c35;
+    --card: #111827;
+    --card2: #1a2340;
+    --border: rgba(99,179,237,0.12);
+    --accent: #3b82f6;
+    --accent2: #60a5fa;
+    --gold: #f59e0b;
+    --green: #10b981;
+    --red: #ef4444;
+    --orange: #f97316;
+    --purple: #a78bfa;
+    --teal: #14b8a6;
+    --pink: #ec4899;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #8899b0;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'Noto Sans KR',sans-serif; font-size:13px; min-height:100vh; }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #0f1528 0%, #1a2340 50%, #0f1528 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+    display: flex; align-items:center; justify-content:space-between;
+    position: sticky; top:0; z-index:100;
+    backdrop-filter: blur(12px);
+  }
+  .header-left { display:flex; align-items:center; gap:14px; }
+  .kz-badge {
+    background: linear-gradient(135deg, var(--accent), #1d4ed8);
+    color:#fff; font-family:'Bebas Neue',sans-serif;
+    font-size:18px; padding:6px 12px; border-radius:8px;
+    letter-spacing:1px;
+  }
+  .header-title { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:2px; color:#fff; }
+  .header-sub { font-size:11px; color:var(--text2); margin-top:2px; letter-spacing:0.5px; }
+  .header-right { display:flex; align-items:center; gap:10px; }
+  .data-badge {
+    background:var(--card2); border:1px solid var(--border);
+    border-radius:6px; padding:5px 12px;
+    font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--accent2);
+  }
+
+  /* Tabs */
+  .tabs { display:flex; gap:0; border-bottom:1px solid var(--border); background:var(--bg2); padding:0 24px; }
+  .tab {
+    padding:12px 18px; cursor:pointer; font-size:12px; font-weight:500;
+    color:var(--text3); border-bottom:2px solid transparent; transition:all 0.2s;
+    display:flex; align-items:center; gap:6px; white-space:nowrap;
+  }
+  .tab.active { color:var(--accent2); border-bottom-color:var(--accent); }
+  .tab:hover:not(.active) { color:var(--text2); }
+  .tab-icon { font-size:13px; }
+
+  /* Layout */
+  .main { padding:20px 24px; }
+  .section { display:none; }
+  .section.active { display:block; }
+
+  /* KPI Cards */
+  .kpi-row { display:grid; grid-template-columns: repeat(5,1fr); gap:14px; margin-bottom:18px; }
+  .kpi {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:12px; padding:16px;
+    position:relative; overflow:hidden;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .kpi:hover { border-color:var(--accent); transform:translateY(-1px); }
+  .kpi::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius:12px 12px 0 0;
+  }
+  .kpi.gold::before { background: linear-gradient(90deg, var(--gold), #fbbf24); }
+  .kpi.green::before { background: linear-gradient(90deg, var(--green), #34d399); }
+  .kpi.purple::before { background: linear-gradient(90deg, var(--purple), #c4b5fd); }
+  .kpi.orange::before { background: linear-gradient(90deg, var(--orange), #fb923c); }
+  .kpi-label { font-size:10px; color:var(--text3); letter-spacing:0.5px; text-transform:uppercase; margin-bottom:6px; }
+  .kpi-value { font-family:'Bebas Neue',sans-serif; font-size:32px; letter-spacing:1px; line-height:1; }
+  .kpi-value.blue { color:var(--accent2); }
+  .kpi-value.gold { color:var(--gold); }
+  .kpi-value.green { color:var(--green); }
+  .kpi-value.purple { color:var(--purple); }
+  .kpi-value.orange { color:var(--orange); }
+  .kpi-sub { font-size:10px; color:var(--text3); margin-top:5px; }
+  .kpi-sub span { color:var(--text2); }
+
+  /* Grid layouts */
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+  .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; margin-bottom:14px; }
+  .grid-3-2 { display:grid; grid-template-columns:1.5fr 1fr; gap:14px; margin-bottom:14px; }
+  .grid-full { margin-bottom:14px; }
+
+  /* Panel */
+  .panel {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:12px; padding:18px;
+    height:100%;
+  }
+  .panel-title {
+    font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px;
+    color:var(--text2); margin-bottom:14px; display:flex; align-items:center; gap:8px;
+  }
+  .panel-title::before { content:''; width:3px; height:12px; background:var(--accent); border-radius:2px; display:inline-block; }
+  .panel-title.gold::before { background:var(--gold); }
+  .panel-title.green::before { background:var(--green); }
+  .panel-title.purple::before { background:var(--purple); }
+  .panel-title.orange::before { background:var(--orange); }
+  .panel-title.teal::before { background:var(--teal); }
+
+  /* Bar chart */
+  .bar-item { margin-bottom:8px; }
+  .bar-label { display:flex; justify-content:space-between; align-items:center; margin-bottom:3px; gap:4px; }
+  .bar-name { font-size:11px; color:var(--text); font-weight:500; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
+  .bar-val { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--accent2); white-space:nowrap; padding-left:6px; flex-shrink:0; }
+  .bar-track { background:rgba(255,255,255,0.05); border-radius:4px; height:7px; overflow:hidden; }
+  .bar-fill { height:100%; border-radius:4px; transition:width 0.8s ease; }
+
+  /* Table */
+  .data-table { width:100%; border-collapse:collapse; }
+  .data-table th {
+    background:var(--bg2); color:var(--text3); font-size:10px;
+    text-transform:uppercase; letter-spacing:0.5px; padding:8px 10px;
+    text-align:left; border-bottom:1px solid var(--border); white-space:nowrap;
+    position:sticky; top:0; z-index:10;
+  }
+  .data-table td { padding:7px 10px; border-bottom:1px solid rgba(255,255,255,0.04); font-size:11px; color:var(--text); }
+  .data-table tr:hover td { background:rgba(99,179,237,0.04); }
+  .data-table td.num { font-family:'JetBrains Mono',monospace; color:var(--accent2); text-align:right; }
+  .data-table td.date { color:var(--text3); font-family:'JetBrains Mono',monospace; font-size:10px; }
+  .scroll-table { max-height:380px; overflow-y:auto; border:1px solid var(--border); border-radius:8px; }
+  .scroll-table::-webkit-scrollbar { width:4px; }
+  .scroll-table::-webkit-scrollbar-thumb { background:var(--accent); border-radius:2px; }
+
+  /* Badge */
+  .badge {
+    display:inline-block; font-size:9px; padding:2px 7px;
+    border-radius:10px; font-weight:600; letter-spacing:0.3px;
+  }
+  .badge-blue { background:rgba(59,130,246,0.2); color:var(--accent2); }
+  .badge-green { background:rgba(16,185,129,0.2); color:var(--green); }
+  .badge-gold { background:rgba(245,158,11,0.2); color:var(--gold); }
+  .badge-purple { background:rgba(167,139,250,0.2); color:var(--purple); }
+  .badge-orange { background:rgba(249,115,22,0.2); color:var(--orange); }
+  .badge-teal { background:rgba(20,184,166,0.2); color:var(--teal); }
+  .badge-pink { background:rgba(236,72,153,0.2); color:var(--pink); }
+  .badge-gray { background:rgba(100,116,139,0.2); color:var(--text3); }
+
+  /* Weekly grid */
+  .week-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-bottom:6px; }
+  .week-header { font-size:9px; color:var(--text3); text-align:center; padding:2px; }
+  .week-cell {
+    aspect-ratio:1; display:flex; align-items:center; justify-content:center;
+    border-radius:4px; font-family:'JetBrains Mono',monospace; font-size:9px;
+    cursor:pointer; transition:transform 0.1s;
+  }
+  .week-cell:hover { transform:scale(1.1); }
+  .heat-0 { background:rgba(255,255,255,0.04); color:var(--text3); }
+  .heat-1 { background:rgba(59,130,246,0.2); color:var(--accent2); }
+  .heat-2 { background:rgba(59,130,246,0.4); color:#fff; }
+  .heat-3 { background:rgba(59,130,246,0.6); color:#fff; }
+  .heat-4 { background:var(--accent); color:#fff; font-weight:700; }
+
+  /* Filters */
+  .filter-bar { display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; align-items:center; }
+  .filter-select {
+    background:var(--card2); border:1px solid var(--border);
+    color:var(--text); border-radius:6px; padding:5px 10px;
+    font-size:11px; font-family:'Noto Sans KR',sans-serif; cursor:pointer;
+    outline:none;
+  }
+  .filter-select:focus { border-color:var(--accent); }
+  .filter-label { font-size:10px; color:var(--text3); white-space:nowrap; }
+  .btn {
+    background:var(--accent); color:#fff; border:none; border-radius:6px;
+    padding:5px 12px; font-size:11px; cursor:pointer; font-family:'Noto Sans KR',sans-serif;
+    transition:background 0.2s;
+  }
+  .btn:hover { background:var(--accent2); }
+  .btn-outline {
+    background:transparent; color:var(--accent2); border:1px solid var(--accent);
+    border-radius:6px; padding:5px 12px; font-size:11px; cursor:pointer;
+    font-family:'Noto Sans KR',sans-serif; transition:all 0.2s;
+  }
+  .btn-outline:hover { background:rgba(59,130,246,0.1); }
+
+  /* Mini chart bars */
+  .sparkbar { display:flex; align-items:flex-end; gap:2px; height:30px; }
+  .sparkbar-col { flex:1; border-radius:2px 2px 0 0; min-height:2px; transition:opacity 0.2s; }
+  .sparkbar-col:hover { opacity:0.7; }
+
+  /* Donut */
+  .donut-wrap { display:flex; align-items:center; gap:16px; }
+  .donut-legend { flex:1; }
+  .legend-item { display:flex; align-items:center; gap:6px; margin-bottom:6px; }
+  .legend-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .legend-label { font-size:11px; color:var(--text2); flex:1; }
+  .legend-pct { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text); }
+
+  /* Rank items */
+  .rank-item { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05); }
+  .rank-item:last-child { border-bottom:none; }
+  .rank-num { font-family:'Bebas Neue',sans-serif; font-size:18px; color:var(--text3); width:22px; text-align:center; }
+  .rank-num.r1 { color:var(--gold); }
+  .rank-num.r2 { color:var(--text2); }
+  .rank-num.r3 { color:var(--orange); }
+  .rank-info { flex:1; }
+  .rank-name { font-size:12px; font-weight:600; color:var(--text); }
+  .rank-meta { font-size:10px; color:var(--text3); margin-top:1px; }
+  .rank-val { font-family:'Bebas Neue',sans-serif; font-size:20px; color:var(--accent2); }
+
+  /* Weekly perf table */
+  .weekly-col { min-width:80px; }
+  .this-week-col { background:rgba(59,130,246,0.08); }
+  .next-week-col { background:rgba(245,158,11,0.06); }
+
+  /* Scrollable section */
+  .section-scroll { overflow-x:auto; }
+
+  /* Tooltip */
+  .tooltip-wrap { position:relative; display:inline-block; }
+  .tooltip-wrap:hover .tooltip { display:block; }
+  .tooltip {
+    display:none; position:absolute; bottom:calc(100%+6px); left:50%; transform:translateX(-50%);
+    background:#1e293b; border:1px solid var(--border); border-radius:6px;
+    padding:6px 10px; font-size:10px; white-space:nowrap; z-index:200;
+    color:var(--text2); pointer-events:none;
+  }
+
+  /* Month toggle */
+  .toggle-group { display:flex; background:var(--bg); border:1px solid var(--border); border-radius:6px; overflow:hidden; }
+  .toggle-btn { padding:5px 12px; font-size:11px; cursor:pointer; color:var(--text3); border:none; background:transparent; transition:all 0.2s; }
+  .toggle-btn.active { background:var(--accent); color:#fff; }
+
+  /* Summary stat row */
+  .stat-row { display:flex; gap:0; border-radius:8px; overflow:hidden; border:1px solid var(--border); margin-bottom:14px; }
+  .stat-cell { flex:1; padding:12px 14px; background:var(--card2); border-right:1px solid var(--border); }
+  .stat-cell:last-child { border-right:none; }
+  .stat-cell-label { font-size:9px; color:var(--text3); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px; }
+  .stat-cell-val { font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600; color:var(--text); }
+
+  /* Annotation */
+  .annotation { background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.2); border-radius:8px; padding:8px 12px; font-size:11px; color:var(--text2); margin-bottom:10px; }
+  .annotation strong { color:var(--accent2); }
+
+  canvas { max-width:100%; }
+
+  /* Compare */
+  .cmp-slot { display:flex;flex-direction:column; }
+  .cmp-dot { width:10px;height:10px;border-radius:50%;display:inline-block;flex-shrink:0; }
+  .cmp-kpi-card {
+    background:var(--card); border:1px solid var(--border); border-radius:12px;
+    padding:14px 18px; position:relative; overflow:hidden;
+  }
+  .cmp-kpi-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    border-radius:12px 12px 0 0;
+  }
+  .cmp-kpi-name { font-size:11px; font-weight:700; margin-bottom:8px; }
+  .cmp-kpi-val { font-family:'Bebas Neue',sans-serif; font-size:28px; line-height:1; }
+  .cmp-kpi-row { display:flex; gap:16px; margin-top:6px; flex-wrap:wrap; }
+  .cmp-kpi-item { font-size:10px; color:var(--text2); }
+  .cmp-kpi-item strong { color:var(--text); font-family:'JetBrains Mono',monospace; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="kz-badge">KZ</div>
+    <div>
+      <div class="header-title">하노이 그룹세일즈 에이전시 분석</div>
+      <div class="header-sub">KidZania Hanoi · Group Sales Agency Performance Dashboard</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="data-badge">📅 데이터: 2024-09 ~ 2026-04</div>
+    <div class="data-badge">에이전시 <strong style="color:var(--gold)">21개사</strong></div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('overview')"><span class="tab-icon">📊</span>종합 현황</div>
+  <div class="tab" onclick="switchTab('weekly')"><span class="tab-icon">📅</span>주별·월별 분석</div>
+  <div class="tab" onclick="switchTab('agency')"><span class="tab-icon">🏆</span>에이전시 랭킹</div>
+  <div class="tab" onclick="switchTab('grouplist')"><span class="tab-icon">📋</span>그룹 상세 데이터</div>
+  <div class="tab" onclick="switchTab('compare')"><span class="tab-icon">⚖️</span>그룹 비교</div>
+  <div class="tab" onclick="switchTab('direct')"><span class="tab-icon">🎯</span>직접 그룹</div>
+</div>
+
+<!-- ============================== TAB 1: 종합 현황 ============================== -->
+<div id="tab-overview" class="section active main">
+
+  <div class="kpi-row">
+    <div class="kpi blue">
+      <div class="kpi-label">총 방문객 (에이전시)</div>
+      <div class="kpi-value blue">51,501</div>
+      <div class="kpi-sub">전체 기간 누적 <span>(에이전시 그룹)</span></div>
+    </div>
+    <div class="kpi gold">
+      <div class="kpi-label">총 예약 그룹 수</div>
+      <div class="kpi-value gold">259</div>
+      <div class="kpi-sub">그룹 건수 <span>(에이전시)</span></div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-label">에이전시 수</div>
+      <div class="kpi-value green">21</div>
+      <div class="kpi-sub">활성 에이전시</div>
+    </div>
+    <div class="kpi purple">
+      <div class="kpi-label">2026 누적 방문객</div>
+      <div class="kpi-value purple">15,167</div>
+      <div class="kpi-sub">~ 3월 기준 <span>(에이전시)</span></div>
+    </div>
+    <div class="kpi orange">
+      <div class="kpi-label">직접 그룹 방문객</div>
+      <div class="kpi-value orange">4,862</div>
+      <div class="kpi-sub">2026년 누적 <span>(Direct)</span></div>
+    </div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-cell"><div class="stat-cell-label">2024 방문객</div><div class="stat-cell-val">3,945</div></div>
+    <div class="stat-cell"><div class="stat-cell-label">2025 방문객</div><div class="stat-cell-val">32,389</div></div>
+    <div class="stat-cell"><div class="stat-cell-label">2026 방문객 (YTD)</div><div class="stat-cell-val" style="color:var(--accent2)">15,167</div></div>
+    <div class="stat-cell"><div class="stat-cell-label">YoY 성장 (2024→2025)</div><div class="stat-cell-val" style="color:var(--green)">+720%</div></div>
+    <div class="stat-cell"><div class="stat-cell-label">1위 에이전시</div><div class="stat-cell-val" style="color:var(--gold)">Happy Smile</div></div>
+    <div class="stat-cell"><div class="stat-cell-label">Happy Smile 점유율</div><div class="stat-cell-val" style="color:var(--gold)">46.6%</div></div>
+  </div>
+
+  <div class="grid-3-2">
+    <div class="panel">
+      <div class="panel-title gold">에이전시별 총 방문객 (전체 기간)</div>
+      <div id="agency-bars"></div>
+    </div>
+    <div class="panel" id="donut-panel">
+      <div class="panel-title purple">에이전시 점유율</div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:14px">
+        <canvas id="donut"></canvas>
+        <div class="donut-legend" id="donut-legend" style="width:100%"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="panel" id="yearly-panel">
+      <div class="panel-title">연도별 방문객 추이</div>
+      <canvas id="yearly-chart" style="width:100%;display:block"></canvas>
+    </div>
+    <div class="panel">
+      <div class="panel-title teal">그룹 유형 분포 (에이전시)</div>
+      <div id="type-bars"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================== TAB 2: 주별·월별 ============================== -->
+<div id="tab-weekly" class="section main">
+
+  <div class="filter-bar">
+    <span class="filter-label">에이전시:</span>
+    <select class="filter-select" id="weekly-agency-filter" onchange="renderWeekly()">
+      <option value="all">전체</option>
+    </select>
+    <span class="filter-label">뷰:</span>
+    <div class="toggle-group">
+      <div class="toggle-btn active" id="btn-weekly" onclick="setView('weekly')">주별</div>
+      <div class="toggle-btn" id="btn-monthly" onclick="setView('monthly')">월별</div>
+    </div>
+    <span class="filter-label">연도:</span>
+    <select class="filter-select" id="year-filter" onchange="renderWeekly()">
+      <option value="all">전체</option>
+      <option value="2024">2024</option>
+      <option value="2025">2025</option>
+      <option value="2026" selected>2026</option>
+    </select>
+  </div>
+
+  <div class="annotation">
+    <strong>이번 주 (APR W1: 30 Mar ~ 05 Apr)</strong> 에이전시 방문객: <strong id="thisweek-val">-</strong>명 &nbsp;|&nbsp;
+    <strong>다음 주 (APR W2: 06 Apr ~ 12 Apr)</strong> 예정: <strong id="nextweek-val">-</strong>명
+  </div>
+
+  <div class="panel grid-full">
+    <div class="panel-title">주별 방문객 현황</div>
+    <div class="section-scroll">
+      <table class="data-table" id="weekly-table">
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel grid-full" style="margin-top:14px">
+    <div class="panel-title">월별 방문객 차트</div>
+    <canvas id="monthly-chart" height="160"></canvas>
+  </div>
+
+</div>
+
+<!-- ============================== TAB 3: 에이전시 랭킹 ============================== -->
+<div id="tab-agency" class="section main">
+
+  <div class="filter-bar">
+    <span class="filter-label">기준 연도:</span>
+    <select class="filter-select" id="rank-year" onchange="renderRanking()">
+      <option value="total">전체 합산</option>
+      <option value="2024">2024</option>
+      <option value="2025">2025</option>
+      <option value="2026" selected>2026 (YTD)</option>
+    </select>
+  </div>
+
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-title gold">🏆 방문객 수 랭킹</div>
+      <div id="rank-visitors"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title purple">📋 예약 건수 랭킹</div>
+      <div id="rank-reservations"></div>
+    </div>
+  </div>
+
+  <div class="panel grid-full">
+    <div class="panel-title">에이전시 상세 성과표</div>
+    <div class="scroll-table">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>에이전시</th>
+            <th style="text-align:right">2024 방문객</th>
+            <th style="text-align:right">2025 방문객</th>
+            <th style="text-align:right">2026 방문객</th>
+            <th style="text-align:right">합계</th>
+            <th style="text-align:right">2024 건수</th>
+            <th style="text-align:right">2025 건수</th>
+            <th style="text-align:right">2026 건수</th>
+            <th style="text-align:right">총 건수</th>
+            <th style="text-align:right">건당 평균</th>
+          </tr>
+        </thead>
+        <tbody id="agency-detail-table"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== TAB 4: 그룹 상세 ============================== -->
+<div id="tab-grouplist" class="section main">
+
+  <!-- 필터 바 -->
+  <div class="filter-bar" style="flex-wrap:wrap;row-gap:8px">
+    <span class="filter-label">에이전시:</span>
+    <select class="filter-select" id="grp-agency" onchange="renderGroupList()"><option value="all">전체</option></select>
+    <span class="filter-label">유형:</span>
+    <select class="filter-select" id="grp-type" onchange="renderGroupList()">
+      <option value="all">전체</option>
+      <option value="Kindergarten">Kindergarten</option>
+      <option value="School">School</option>
+    </select>
+    <span class="filter-label">섹터:</span>
+    <select class="filter-select" id="grp-sector" onchange="renderGroupList()">
+      <option value="all">전체</option>
+      <option value="Public">Public</option>
+      <option value="Private">Private</option>
+      <option value="International">International</option>
+    </select>
+    <div style="display:flex;align-items:center;gap:6px;margin-left:4px">
+      <span class="filter-label">기간:</span>
+      <input type="date" class="filter-select" id="grp-date-from" onchange="renderGroupList()" style="padding:4px 8px;color-scheme:dark">
+      <span style="color:var(--text3);font-size:12px">~</span>
+      <input type="date" class="filter-select" id="grp-date-to" onchange="renderGroupList()" style="padding:4px 8px;color-scheme:dark">
+      <button class="btn-outline" onclick="clearDateRange()" style="padding:4px 8px;font-size:10px">초기화</button>
+    </div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap">
+      <button class="btn-outline" onclick="setPreset('thisMonth')" style="padding:3px 9px;font-size:10px">이번달</button>
+      <button class="btn-outline" onclick="setPreset('lastMonth')" style="padding:3px 9px;font-size:10px">지난달</button>
+      <button class="btn-outline" onclick="setPreset('q1_2026')" style="padding:3px 9px;font-size:10px">2026 Q1</button>
+      <button class="btn-outline" onclick="setPreset('2026')" style="padding:3px 9px;font-size:10px">2026 전체</button>
+      <button class="btn-outline" onclick="setPreset('2025')" style="padding:3px 9px;font-size:10px">2025 전체</button>
+      <button class="btn-outline" onclick="setPreset('2024')" style="padding:3px 9px;font-size:10px">2024 전체</button>
+      <button class="btn-outline" onclick="setPreset('all')" style="padding:3px 9px;font-size:10px">전체 기간</button>
+    </div>
+    <span id="grp-count" style="font-size:11px;color:var(--text3);margin-left:auto;align-self:center"></span>
+  </div>
+
+  <!-- 날짜 선택 시: 심층 분석 패널 -->
+  <div id="day-analytics" style="display:none;margin-bottom:14px">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1.5px;color:var(--accent2);margin-bottom:12px;display:flex;align-items:center;gap:8px">
+      <span style="background:var(--accent);color:#fff;padding:2px 10px;border-radius:6px;font-size:13px" id="day-title-badge">기간</span>
+      <span id="day-analytics-title">기간별 심층 분석</span>
+      <span style="font-size:11px;font-family:'Noto Sans KR',sans-serif;color:var(--text3);font-weight:400;letter-spacing:0" id="day-subtitle"></span>
+    </div>
+
+    <!-- KPI 4칸 -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px" id="day-kpis"></div>
+
+    <!-- 그래프 3단 -->
+    <div style="display:grid;grid-template-columns:1.1fr 0.9fr 1fr;gap:12px;margin-bottom:12px">
+      <!-- 그룹별 방문객 바 -->
+      <div class="panel">
+        <div class="panel-title">그룹별 방문객 수</div>
+        <div id="day-group-bars" style="max-height:220px;overflow-y:auto;padding-right:2px;scrollbar-width:thin;scrollbar-color:var(--accent) transparent"></div>
+      </div>
+      <!-- 유형/섹터 도넛 -->
+      <div class="panel">
+        <div class="panel-title purple">유형 · 섹터 구성</div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div>
+            <div style="font-size:10px;color:var(--text3);margin-bottom:6px">그룹 유형</div>
+            <div id="day-type-bars"></div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--text3);margin-bottom:6px">섹터</div>
+            <div id="day-sector-bars"></div>
+          </div>
+        </div>
+      </div>
+      <!-- 구성비 파이 -->
+      <div class="panel" id="day-pie-panel">
+        <div class="panel-title teal">방문객 구성 (어린이/성인/영아)</div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+          <canvas id="day-pie"></canvas>
+          <div id="day-pie-legend" style="width:100%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 에이전시별 + 그룹 크기 분포 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px">
+      <div class="panel">
+        <div class="panel-title gold">에이전시별 방문객</div>
+        <div id="day-agency-bars"></div>
+      </div>
+      <div class="panel" id="day-size-panel">
+        <div class="panel-title orange">그룹 규모 분포</div>
+        <canvas id="day-size-chart" style="width:100%;display:block"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- 테이블 -->
+  <div class="scroll-table" style="max-height:400px">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>날짜</th>
+          <th>그룹명</th>
+          <th>에이전시</th>
+          <th>유형</th>
+          <th>섹터</th>
+          <th style="text-align:right">어린이</th>
+          <th style="text-align:right">성인</th>
+          <th style="text-align:right">영아</th>
+          <th style="text-align:right">합계</th>
+        </tr>
+      </thead>
+      <tbody id="group-list-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ============================== TAB 5: 그룹 비교 ============================== -->
+<div id="tab-compare" class="section main">
+
+  <!-- 안내 -->
+  <div class="annotation" style="margin-bottom:16px">
+    <strong>⚖️ 그룹 비교</strong> — 최대 4개 그룹(에이전시)을 선택하고 기간을 설정해 나란히 비교하세요. 방문객 수·구성·추이를 그래프로 확인할 수 있습니다.
+  </div>
+
+  <!-- 기간 + 그룹 선택 -->
+  <div class="panel" style="margin-bottom:14px">
+    <div class="panel-title">비교 설정</div>
+    <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end">
+      <!-- 기간 -->
+      <div>
+        <div style="font-size:10px;color:var(--text3);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px">기간</div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <input type="date" class="filter-select" id="cmp-from" style="padding:5px 8px;color-scheme:dark" value="2026-01-01">
+          <span style="color:var(--text3)">~</span>
+          <input type="date" class="filter-select" id="cmp-to" style="padding:5px 8px;color-scheme:dark" value="2026-12-31">
+        </div>
+        <div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap">
+          <button class="btn-outline" onclick="setCmpPreset('2026')" style="padding:3px 8px;font-size:10px">2026 전체</button>
+          <button class="btn-outline" onclick="setCmpPreset('2025')" style="padding:3px 8px;font-size:10px">2025 전체</button>
+          <button class="btn-outline" onclick="setCmpPreset('q1_2026')" style="padding:3px 8px;font-size:10px">2026 Q1</button>
+          <button class="btn-outline" onclick="setCmpPreset('thisMonth')" style="padding:3px 8px;font-size:10px">이번달</button>
+          <button class="btn-outline" onclick="setCmpPreset('all')" style="padding:3px 8px;font-size:10px">전체 기간</button>
+        </div>
+      </div>
+
+      <!-- 그룹 4개 선택 -->
+      <div style="display:flex;gap:10px;flex-wrap:wrap;flex:1">
+        <div id="cmp-slot-0" class="cmp-slot">
+          <div style="font-size:10px;color:var(--text3);margin-bottom:5px;display:flex;align-items:center;gap:6px">
+            <span class="cmp-dot" style="background:#3b82f6"></span>그룹 1
+          </div>
+          <select class="filter-select" id="cmp-ag-0" onchange="renderCompare()" style="min-width:160px">
+            <option value="">— 선택 안 함 —</option>
+          </select>
+        </div>
+        <div id="cmp-slot-1" class="cmp-slot">
+          <div style="font-size:10px;color:var(--text3);margin-bottom:5px;display:flex;align-items:center;gap:6px">
+            <span class="cmp-dot" style="background:#f59e0b"></span>그룹 2
+          </div>
+          <select class="filter-select" id="cmp-ag-1" onchange="renderCompare()" style="min-width:160px">
+            <option value="">— 선택 안 함 —</option>
+          </select>
+        </div>
+        <div id="cmp-slot-2" class="cmp-slot">
+          <div style="font-size:10px;color:var(--text3);margin-bottom:5px;display:flex;align-items:center;gap:6px">
+            <span class="cmp-dot" style="background:#10b981"></span>그룹 3
+          </div>
+          <select class="filter-select" id="cmp-ag-2" onchange="renderCompare()" style="min-width:160px">
+            <option value="">— 선택 안 함 —</option>
+          </select>
+        </div>
+        <div id="cmp-slot-3" class="cmp-slot">
+          <div style="font-size:10px;color:var(--text3);margin-bottom:5px;display:flex;align-items:center;gap:6px">
+            <span class="cmp-dot" style="background:#a78bfa"></span>그룹 4
+          </div>
+          <select class="filter-select" id="cmp-ag-3" onchange="renderCompare()" style="min-width:160px">
+            <option value="">— 선택 안 함 —</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="btn" onclick="renderCompare()" style="padding:8px 18px;font-size:12px;align-self:flex-end">📊 비교 실행</button>
+    </div>
+  </div>
+
+  <!-- 비교 없을 때 안내 -->
+  <div id="cmp-empty" style="text-align:center;padding:60px 0;color:var(--text3);font-size:13px">
+    에이전시를 1개 이상 선택하고 비교 실행을 눌러주세요
+  </div>
+
+  <!-- 결과 영역 -->
+  <div id="cmp-result" style="display:none">
+
+    <!-- KPI 카드 4개 -->
+    <div id="cmp-kpis" style="display:grid;gap:10px;margin-bottom:14px"></div>
+
+    <!-- 차트 2개: 총 방문객 바 + 월별 추이 -->
+    <div style="display:grid;grid-template-columns:1fr 1.6fr;gap:14px;margin-bottom:14px">
+      <div class="panel" id="cmp-bar-panel">
+        <div class="panel-title gold">총 방문객 비교</div>
+        <canvas id="cmp-bar-chart" style="width:100%;display:block"></canvas>
+      </div>
+      <div class="panel" id="cmp-line-panel">
+        <div class="panel-title">월별 방문객 추이 비교</div>
+        <canvas id="cmp-line-chart" style="width:100%;display:block"></canvas>
+      </div>
+    </div>
+
+    <!-- 차트 2개: 그룹 구성 + 규모 분포 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+      <div class="panel" id="cmp-comp-panel">
+        <div class="panel-title teal">방문객 구성 비교 (어린이/성인/영아)</div>
+        <canvas id="cmp-comp-chart" style="width:100%;display:block"></canvas>
+      </div>
+      <div class="panel" id="cmp-type-panel">
+        <div class="panel-title purple">그룹 유형 비교 (Kindergarten/School)</div>
+        <canvas id="cmp-type-chart" style="width:100%;display:block"></canvas>
+      </div>
+    </div>
+
+    <!-- 상세 데이터 테이블 -->
+    <div class="panel">
+      <div class="panel-title">에이전시별 상세 비교표</div>
+      <div class="scroll-table">
+        <table class="data-table" id="cmp-detail-table"></table>
+      </div>
+    </div>
+
+    <!-- 개별 그룹 방문 기록 -->
+    <div id="cmp-group-logs" style="display:grid;gap:12px;margin-top:14px"></div>
+  </div>
+</div>
+
+<!-- ============================== TAB 6: 직접 그룹 ============================== -->
+<div id="tab-direct" class="section main">
+
+  <div class="kpi-row" style="grid-template-columns:repeat(4,1fr)">
+    <div class="kpi blue">
+      <div class="kpi-label">총 직접 방문객</div>
+      <div class="kpi-value blue">4,862</div>
+      <div class="kpi-sub">2026년 누적</div>
+    </div>
+    <div class="kpi gold">
+      <div class="kpi-label">총 직접 그룹 수</div>
+      <div class="kpi-value gold">24</div>
+      <div class="kpi-sub">그룹 건수</div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-label">School 방문객</div>
+      <div class="kpi-value green">2,007</div>
+      <div class="kpi-sub">School 카테고리</div>
+    </div>
+    <div class="kpi purple">
+      <div class="kpi-label">Kindergarten 방문객</div>
+      <div class="kpi-value purple">2,855</div>
+      <div class="kpi-sub">Kindergarten 카테고리</div>
+    </div>
+  </div>
+
+  <div class="annotation">
+    <strong>이번 주 (APR W1)</strong> 직접 그룹: <strong>1,276명</strong> &nbsp;|&nbsp;
+    <strong>다음 주 (APR W2)</strong> 예정: <strong>115명</strong>
+  </div>
+
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-title">주별 직접 그룹 현황</div>
+      <table class="data-table">
+        <thead>
+          <tr><th>주차</th><th>기간</th><th style="text-align:right">School</th><th style="text-align:right">Kindergarten</th><th style="text-align:right">합계</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="badge-blue">MAR W1</td><td class="date">02~08 Mar</td><td class="num">537</td><td class="num">908</td><td class="num" style="font-weight:700">1,445</td></tr>
+          <tr><td>MAR W2</td><td class="date">09~15 Mar</td><td class="num">45</td><td class="num">267</td><td class="num">312</td></tr>
+          <tr><td>MAR W3</td><td class="date">16~22 Mar</td><td class="num">225</td><td class="num">433</td><td class="num">658</td></tr>
+          <tr><td>MAR W4</td><td class="date">23~29 Mar</td><td class="num">0</td><td class="num">433</td><td class="num">433</td></tr>
+          <tr style="background:rgba(59,130,246,0.07)"><td><strong style="color:var(--accent2)">APR W1 ★</strong></td><td class="date">30 Mar~05 Apr</td><td class="num">1,120</td><td class="num">156</td><td class="num" style="color:var(--accent2);font-weight:700">1,276</td></tr>
+          <tr style="background:rgba(245,158,11,0.06)"><td style="color:var(--gold)">APR W2 ▶</td><td class="date">06~12 Apr</td><td class="num">25</td><td class="num">90</td><td class="num" style="color:var(--gold)">115</td></tr>
+          <tr><td>APR W3</td><td class="date">13~19 Apr</td><td class="num">0</td><td class="num">110</td><td class="num">110</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <div class="panel-title teal">직접 그룹 상세 목록</div>
+      <div class="scroll-table" style="max-height:280px">
+        <table class="data-table" id="direct-detail"></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== DATA =====
+const agencyData = [
+  {name:'Happy Smile', v2024:0, v2025:17957, v2026:6026, r2024:0, r2025:76, r2026:16},
+  {name:'Anh Quân Travel', v2024:0, v2025:4914, v2026:2138, r2024:0, r2025:33, r2026:6},
+  {name:'Ms Hiền', v2024:3945, v2025:1108, v2026:363, r2024:41, r2025:13, r2026:5},
+  {name:'Kinh Bắc Travel', v2024:0, v2025:759, v2026:3108, r2024:0, r2025:5, r2026:12},
+  {name:'Hải Hà Travel', v2024:0, v2025:1973, v2026:1056, r2024:0, r2025:4, r2026:4},
+  {name:'Lương Sơn Tour', v2024:0, v2025:1833, v2026:232, r2024:0, r2025:11, r2026:1},
+  {name:'Hạnh Phúc Tourism', v2024:0, v2025:1213, v2026:0, r2024:0, r2025:3, r2026:0},
+  {name:'Phương Việt Travel', v2024:0, v2025:1101, v2026:0, r2024:0, r2025:1, r2026:0},
+  {name:'Tripify', v2024:0, v2025:580, v2026:221, r2024:0, r2025:8, r2026:3},
+  {name:'NewGen', v2024:0, v2025:450, v2026:0, r2024:0, r2025:4, r2026:0},
+  {name:'Skill Development', v2024:0, v2025:501, v2026:0, r2024:0, r2025:1, r2026:0},
+  {name:'Tân Á', v2024:0, v2025:0, v2026:580, r2024:0, r2025:0, r2026:1},
+  {name:'Cánh Buồm Xanh', v2024:0, v2025:0, v2026:310, r2024:0, r2025:0, r2026:1},
+  {name:'Đại Khánh', v2024:0, v2025:0, v2026:149, r2024:0, r2025:0, r2026:1},
+  {name:'Minh Trung', v2024:0, v2025:0, v2026:334, r2024:0, r2025:0, r2026:4},
+  {name:'HNTravel', v2024:0, v2025:0, v2026:250, r2024:0, r2025:0, r2026:1},
+  {name:'Star Travel', v2024:0, v2025:0, v2026:210, r2024:0, r2025:0, r2026:2},
+  {name:'Vietnam Global', v2024:0, v2025:0, v2026:130, r2024:0, r2025:0, r2026:1},
+  {name:'An Thành Travel', v2024:0, v2025:0, v2026:60, r2024:0, r2025:0, r2026:1},
+  {name:'Hùng Vương Travel', v2024:0, v2025:0, v2026:0, r2024:0, r2025:0, r2026:0},
+  {name:'Vạn An Travel', v2024:0, v2025:0, v2026:0, r2024:0, r2025:0, r2026:0},
+];
+
+const weeklyData = {
+  agencies: ['Happy Smile','Anh Quân Travel','Đại Khánh','Tripify','An Thành Travel','Cánh Buồm Xanh','Hải Hà Travel','Hạnh Phúc Tourism','HNTravel','Hùng Vương Travel','Kinh Bắc Travel','Lương Sơn Tour','Minh Trung','Ms Hiền','NewGen','Phương Việt Travel','Skill Development','Star Travel','Tân Á','Vietnam Global','Vạn An Travel'],
+  weeks: ['MAR_W1','MAR_W2','MAR_W3','MAR_W4','APR_W1','APR_W2','APR_W3','APR_W4','APR_W5','MAY_W1','MAY_W2','MAY_W3','MAY_W4'],
+  weekLabels: ['MAR W1\n02~08 Mar','MAR W2\n09~15 Mar','MAR W3\n16~22 Mar','MAR W4\n23~29 Mar','APR W1\n30 Mar~05 Apr','APR W2\n06~12 Apr','APR W3\n13~19 Apr','APR W4\n20~26 Apr','APR W5\n27 Apr~03 May','MAY W1\n04~10 May','MAY W2\n11~17 May','MAY W3\n18~24 May','MAY W4\n25~31 May'],
+  data: {
+    'Happy Smile':     [0,0,966,213,850,1500,800,0,0,800,700,0,0],
+    'Anh Quân Travel': [452,479,407,0,100,0,0,0,0,500,200,0,0],
+    'Đại Khánh':       [0,0,149,0,0,0,0,0,0,0,0,0,0],
+    'Tripify':         [0,0,145,43,0,0,33,0,0,0,0,0,0],
+    'An Thành Travel': [0,0,0,0,0,60,0,0,0,0,0,0,0],
+    'Cánh Buồm Xanh':  [0,0,0,310,0,0,0,0,0,0,0,0,0],
+    'Hải Hà Travel':   [0,522,0,0,170,0,0,0,0,0,0,0,0],
+    'Hạnh Phúc Tourism':[0,0,0,0,0,0,0,0,0,0,0,0,0],
+    'HNTravel':        [0,0,0,0,250,0,0,0,0,0,0,0,0],
+    'Hùng Vương Travel':[0,0,0,0,0,0,0,0,0,0,0,0,0],
+    'Kinh Bắc Travel': [0,58,0,0,300,900,350,200,0,200,600,500,0],
+    'Lương Sơn Tour':  [0,0,0,0,0,232,0,0,0,0,0,0,0],
+    'Minh Trung':      [0,0,0,0,0,0,186,0,0,0,0,0,0],
+    'Ms Hiền':         [0,0,0,0,0,0,0,0,0,0,0,0,0],
+    'NewGen':          [0,0,0,0,0,0,0,0,0,0,0,0,0],
+    'Phương Việt Travel':[0,0,0,0,0,0,0,0,0,0,0,0,0],
+    'Skill Development':[0,0,0,0,0,0,0,0,0,0,0,0,0],
+    'Star Travel':     [0,0,0,0,0,210,0,0,0,0,0,0,0],
+    'Tân Á':           [0,0,580,0,0,0,0,0,0,0,0,0,0],
+    'Vietnam Global':  [0,0,130,0,0,0,0,0,0,0,0,0,0],
+    'Vạn An Travel':   [0,0,0,0,0,0,0,0,0,0,0,0,0],
+  }
+};
+
+const groupListData = [
+  {year:2024,month:9,dov:'2024-09-26',name:'Ms Hiền (2 giờ)',child:125,adult:18,toddler:0,total:143,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:10,dov:'2024-10-09',name:'Ms Hiền (2H)',child:65,adult:16,toddler:8,total:89,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:10,dov:'2024-10-17',name:'Đoàn Ms Hiền (2h)',child:236,adult:39,toddler:10,total:285,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:10,dov:'2024-10-21',name:'Moonlight Montessori Văn Phú (2 giờ)',child:42,adult:10,toddler:0,total:52,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:10,dov:'2024-10-29',name:'MN Trẻ Tài Năng (2H)',child:127,adult:42,toddler:45,total:214,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:10,dov:'2024-10-31',name:'MN Sora Kids (2 giờ)',child:21,adult:4,toddler:0,total:25,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:11,dov:'2024-11-04',name:'Mầm Non Happy House (2h)',child:54,adult:10,toddler:0,total:64,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:11,dov:'2024-11-06',name:'MN Vân Hà (2H)',child:90,adult:14,toddler:7,total:111,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:11,dov:'2024-11-07',name:'MN Tài Năng Việt (2H)',child:34,adult:7,toddler:7,total:48,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:11,dov:'2024-11-08',name:'Mn Sơn Ca (2h)',child:65,adult:14,toddler:0,total:79,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:11,dov:'2024-11-12',name:'MN Bông Hoa Nhỏ (2H)',child:90,adult:10,toddler:0,total:100,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:11,dov:'2024-11-13',name:'MN Vườn Ướm Hạnh Phúc (2H)',child:56,adult:21,toddler:23,total:100,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:11,dov:'2024-11-13',name:'Mn Bút chì màu (2 tiếng)',child:55,adult:11,toddler:0,total:66,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:11,dov:'2024-11-15',name:'MN Công dân toàn cầu (2H)',child:33,adult:5,toddler:7,total:45,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:11,dov:'2024-11-15',name:'MN Chích Bông 2 (2H)',child:44,adult:5,toddler:12,total:61,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:11,dov:'2024-11-25',name:'MN Vườn Ong - Dương Nội (2H)',child:88,adult:14,toddler:0,total:102,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:11,dov:'2024-11-25',name:'MN Vườn Ong - Yên Nghĩa (2H)',child:73,adult:14,toddler:20,total:107,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:11,dov:'2024-11-25',name:'Mn Ong Vàng - Thường Tín',child:58,adult:12,toddler:0,total:70,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:11,dov:'2024-11-26',name:'RBIS (2H)',child:20,adult:13,toddler:8,total:41,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:11,dov:'2024-11-26',name:'Golden Kids (2H)',child:49,adult:12,toddler:2,total:63,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:11,dov:'2024-11-27',name:'Mn Moonlight (2H)',child:51,adult:12,toddler:0,total:63,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:11,dov:'2024-11-28',name:'MN Vườn Trẻ Thơ (2H)',child:256,adult:30,toddler:0,total:286,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:11,dov:'2024-11-29',name:'MN Vườn Trẻ Thơ (2H)',child:221,adult:33,toddler:31,total:285,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:12,dov:'2024-12-05',name:'MN IQ Thanh Hà (2H)',child:52,adult:7,toddler:0,total:59,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:12,dov:'2024-12-05',name:'MN IQ Steam (2H)',child:52,adult:6,toddler:0,total:58,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:12,dov:'2024-12-05',name:'MN Thực Nghiệm (2H)',child:55,adult:7,toddler:0,total:62,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:12,dov:'2024-12-05',name:'MN Chắp Cánh Thiên Thần (2H)',child:49,adult:8,toddler:0,total:57,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:12,dov:'2024-12-06',name:'Học Viện Trẻ Thơ (2H)',child:41,adult:5,toddler:0,total:46,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:12,dov:'2024-12-06',name:'Mn Viet Kids (2H)',child:52,adult:10,toddler:13,total:75,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:12,dov:'2024-12-06',name:'MN Ước Mơ (2H)',child:33,adult:7,toddler:6,total:46,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:12,dov:'2024-12-06',name:'MN Tuổi Thơ (2H)',child:28,adult:10,toddler:2,total:40,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:12,dov:'2024-12-12',name:'Mn Siêu nhí (2 tiếng)',child:29,adult:11,toddler:0,total:40,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:12,dov:'2024-12-16',name:'MN AKO (2H)',child:79,adult:28,toddler:7,total:114,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:12,dov:'2024-12-17',name:'Mầm Non Bé Ong (2H)',child:26,adult:7,toddler:0,total:33,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:12,dov:'2024-12-18',name:'Trường Mầm Non Hope (2 tiếng)',child:106,adult:76,toddler:0,total:182,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:12,dov:'2024-12-19',name:'Lalaland Preschool (2H)',child:37,adult:8,toddler:0,total:45,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:12,dov:'2024-12-20',name:'MN Butterfly (2H)',child:60,adult:16,toddler:10,total:86,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:12,dov:'2024-12-20',name:'Busy Bees Global (2H)',child:52,adult:105,toddler:0,total:157,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:12,dov:'2024-12-23',name:'MN Thiên Thần Nhỏ (2H)',child:50,adult:8,toddler:25,total:83,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:12,dov:'2024-12-23',name:'Mầm Non Happy Steamy Kids (2H)',child:112,adult:22,toddler:0,total:134,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2024,month:12,dov:'2024-12-24',name:'Bibo House (2H)',child:113,adult:16,toddler:0,total:129,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2025,month:1,dov:'2025-01-15',name:'Mn Nắng Xanh (2H)',child:72,adult:11,toddler:0,total:83,type:'Kindergarten',sector:'Public',agency:'NewGen'},
+  {year:2025,month:2,dov:'2025-02-15',name:'Lương Sơn Tour',child:32,adult:20,toddler:0,total:52,type:'School',sector:'Public',agency:'Lương Sơn Tour'},
+  {year:2025,month:2,dov:'2025-02-21',name:'Happy Smile - Dương Nội (2h)',child:298,adult:40,toddler:62,total:400,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:2,dov:'2025-02-22',name:'Lương Sơn Tour',child:69,adult:48,toddler:0,total:117,type:'School',sector:'Public',agency:'Lương Sơn Tour'},
+  {year:2025,month:2,dov:'2025-02-24',name:'Happy Smile - An Khánh (2h)',child:282,adult:36,toddler:36,total:354,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:2,dov:'2025-02-25',name:'Tiểu học Nam Tiến (2h)',child:388,adult:48,toddler:0,total:436,type:'School',sector:'Public',agency:'Anh Quân Travel'},
+  {year:2025,month:2,dov:'2025-02-25',name:'Sakura Kids Long Biên (2H)',child:150,adult:36,toddler:12,total:198,type:'Kindergarten',sector:'Private',agency:'Happy Smile'},
+  {year:2025,month:2,dov:'2025-02-27',name:'MN Tân Việt Ý (2H)',child:103,adult:13,toddler:0,total:116,type:'Kindergarten',sector:'Private',agency:'Tripify'},
+  {year:2025,month:2,dov:'2025-02-28',name:'Happy Smile (2h) MN Thanh Lương HBT',child:110,adult:25,toddler:0,total:135,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:2,dov:'2025-02-28',name:'MN Gấu Trúc Panda (2H)',child:46,adult:6,toddler:0,total:52,type:'Kindergarten',sector:'Private',agency:'Happy Smile'},
+  {year:2025,month:2,dov:'2025-02-28',name:'MN Ngôi Nhà Mơ Ước (2H)',child:32,adult:5,toddler:0,total:37,type:'Kindergarten',sector:'Private',agency:'Happy Smile'},
+  {year:2025,month:2,dov:'2025-02-28',name:'Sakura Kids Thanh Hà (2H)',child:233,adult:35,toddler:0,total:268,type:'Kindergarten',sector:'Private',agency:'Happy Smile'},
+  {year:2025,month:3,dov:'2025-03-01',name:'Tripify',child:36,adult:33,toddler:2,total:71,type:'School',sector:'Public',agency:'Tripify'},
+  {year:2025,month:3,dov:'2025-03-02',name:'Tripify',child:64,adult:47,toddler:3,total:114,type:'School',sector:'Public',agency:'Tripify'},
+  {year:2025,month:3,dov:'2025-03-04',name:'Tripify (2h)',child:61,adult:14,toddler:7,total:82,type:'School',sector:'Public',agency:'Tripify'},
+  {year:2025,month:3,dov:'2025-03-06',name:'MN Sakura Kids Hồ Tùng Mậu (2H)',child:68,adult:13,toddler:5,total:86,type:'Kindergarten',sector:'Private',agency:'Happy Smile'},
+  {year:2025,month:3,dov:'2025-03-06',name:'Mầm non Bách Khoa (2H)',child:189,adult:30,toddler:0,total:219,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:3,dov:'2025-03-06',name:'Tripify',child:38,adult:19,toddler:0,total:57,type:'School',sector:'Public',agency:'Tripify'},
+  {year:2025,month:3,dov:'2025-03-12',name:'Tiểu học Quang Trung - Phú Xuyên (2h)',child:144,adult:37,toddler:0,total:181,type:'School',sector:'Public',agency:'Anh Quân Travel'},
+  {year:2025,month:3,dov:'2025-03-13',name:'MN Lạc Trung (2h)',child:250,adult:32,toddler:0,total:282,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:3,dov:'2025-03-13',name:'MN Ánh Sao (2h)',child:165,adult:33,toddler:0,total:198,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:3,dov:'2025-03-13',name:'Lương Sơn Tour',child:147,adult:67,toddler:0,total:214,type:'School',sector:'Public',agency:'Lương Sơn Tour'},
+  {year:2025,month:3,dov:'2025-03-14',name:'MN Lê Đại Hành (2H)',child:259,adult:51,toddler:0,total:310,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:3,dov:'2025-03-15',name:'Tripify',child:25,adult:23,toddler:1,total:49,type:'School',sector:'Public',agency:'Tripify'},
+  {year:2025,month:3,dov:'2025-03-16',name:'TH Yên Thạch',child:141,adult:62,toddler:0,total:203,type:'Kindergarten',sector:'Public',agency:'Anh Quân Travel'},
+  {year:2025,month:3,dov:'2025-03-17',name:'Anh Quân Travel (2H)',child:22,adult:3,toddler:0,total:25,type:'Kindergarten',sector:'Public',agency:'Anh Quân Travel'},
+  {year:2025,month:3,dov:'2025-03-18',name:'MN Hoa Hồng - Q. Hai Bà Trưng',child:137,adult:23,toddler:0,total:160,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:3,dov:'2025-03-18',name:'Tiểu học Quảng Bị',child:672,adult:68,toddler:0,total:740,type:'School',sector:'Public',agency:'Hải Hà Travel'},
+  {year:2025,month:3,dov:'2025-03-18',name:'Tiểu học Sơn Hà',child:218,adult:62,toddler:0,total:280,type:'School',sector:'Public',agency:'Hải Hà Travel'},
+  {year:2025,month:3,dov:'2025-03-19',name:'MN Sao Mai',child:236,adult:33,toddler:0,total:269,type:'Kindergarten',sector:'Public',agency:'Lương Sơn Tour'},
+  {year:2025,month:3,dov:'2025-03-20',name:'Lương Sơn Tour',child:170,adult:73,toddler:0,total:243,type:'School',sector:'Public',agency:'Lương Sơn Tour'},
+  {year:2025,month:3,dov:'2025-03-24',name:'Tripify (2H)',child:53,adult:12,toddler:0,total:65,type:'Kindergarten',sector:'Public',agency:'Tripify'},
+  {year:2025,month:3,dov:'2025-03-26',name:'Tiểu học Đại Xuyên (2H)',child:412,adult:78,toddler:0,total:490,type:'School',sector:'Public',agency:'Hải Hà Travel'},
+  {year:2025,month:3,dov:'2025-03-27',name:'MN Hoa Phượng - Q. Hai Bà Trưng',child:221,adult:32,toddler:0,total:253,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:3,dov:'2025-03-27',name:'MN Tứ Liên - Q. Tây Hồ',child:341,adult:33,toddler:0,total:374,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:3,dov:'2025-03-28',name:'Tiểu học Phú Túc',child:390,adult:86,toddler:0,total:476,type:'School',sector:'Public',agency:'Anh Quân Travel'},
+  {year:2025,month:3,dov:'2025-03-28',name:'Tripify',child:20,adult:6,toddler:0,total:26,type:'School',sector:'Public',agency:'Tripify'},
+  {year:2025,month:4,dov:'2025-04-01',name:'MN Thăng Long',child:195,adult:18,toddler:0,total:213,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:4,dov:'2025-04-01',name:'MN Hoa Hồng',child:269,adult:30,toddler:0,total:299,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:4,dov:'2025-04-01',name:'Tiểu học Khai Thái',child:488,adult:63,toddler:0,total:551,type:'School',sector:'Public',agency:'Anh Quân Travel'},
+  {year:2025,month:4,dov:'2025-04-02',name:'MN Họa My',child:491,adult:59,toddler:0,total:550,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:4,dov:'2025-04-03',name:'MN Nguyễn Tuân',child:367,adult:46,toddler:0,total:413,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:4,dov:'2025-04-08',name:'MN Bạch Đằng',child:351,adult:58,toddler:0,total:409,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:4,dov:'2025-04-08',name:'Amon Kindercare',child:85,adult:16,toddler:0,total:101,type:'Kindergarten',sector:'Private',agency:'Lương Sơn Tour'},
+  {year:2025,month:4,dov:'2025-04-09',name:'MG Chim Non',child:187,adult:29,toddler:0,total:216,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:4,dov:'2025-04-09',name:'Amon Kindercare',child:123,adult:20,toddler:0,total:143,type:'Kindergarten',sector:'Private',agency:'Lương Sơn Tour'},
+  {year:2025,month:4,dov:'2025-04-09',name:'MN Đoàn Thị Điểm',child:417,adult:54,toddler:0,total:471,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:4,dov:'2025-04-09',name:'Lương Sơn',child:258,adult:117,toddler:0,total:375,type:'School',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:4,dov:'2025-04-10',name:'Happy Smile',child:328,adult:46,toddler:0,total:374,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:4,dov:'2025-04-10',name:'Amon Kindercare',child:89,adult:15,toddler:0,total:104,type:'Kindergarten',sector:'Private',agency:'Lương Sơn Tour'},
+  {year:2025,month:4,dov:'2025-04-10',name:'Anh Quan Travel',child:97,adult:37,toddler:0,total:134,type:'School',sector:'Public',agency:'Anh Quân Travel'},
+  {year:2025,month:4,dov:'2025-04-12',name:'Lương Sơn Tour',child:56,adult:53,toddler:0,total:109,type:'School',sector:'Public',agency:'Lương Sơn Tour'},
+  {year:2025,month:4,dov:'2025-04-14',name:'MN Chu Văn An',child:521,adult:68,toddler:0,total:589,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:4,dov:'2025-04-15',name:'MN B',child:179,adult:50,toddler:0,total:229,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:4,dov:'2025-04-15',name:'MN Việt Bun',child:402,adult:56,toddler:0,total:458,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:4,dov:'2025-04-15',name:'MN CHOCOPIE',child:61,adult:13,toddler:0,total:74,type:'Kindergarten',sector:'Public',agency:'Anh Quân Travel'},
+  {year:2025,month:4,dov:'2025-04-16',name:'MN Xuân La',child:493,adult:56,toddler:0,total:549,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:4,dov:'2025-04-17',name:'MN FIS Ngoại Giao Đoàn',child:61,adult:14,toddler:0,total:75,type:'Kindergarten',sector:'Public',agency:'Anh Quân Travel'},
+  {year:2025,month:4,dov:'2025-04-17',name:'MN IQ',child:70,adult:10,toddler:0,total:80,type:'Kindergarten',sector:'Public',agency:'Anh Quân Travel'},
+  {year:2025,month:4,dov:'2025-04-17',name:'MN FIS Thăng Long',child:26,adult:10,toddler:6,total:42,type:'Kindergarten',sector:'Public',agency:'Anh Quân Travel'},
+  {year:2025,month:4,dov:'2025-04-18',name:'MN An Dương',child:331,adult:42,toddler:0,total:373,type:'Kindergarten',sector:'Private',agency:'Lương Sơn Tour'},
+  {year:2025,month:4,dov:'2025-04-18',name:'Happy Smile',child:120,adult:14,toddler:0,total:134,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:4,dov:'2025-04-21',name:'MN Tuổi Hoa',child:385,adult:56,toddler:0,total:441,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:4,dov:'2025-04-24',name:'MN Happy Smile (MN Quỳnh Lôi)',child:147,adult:35,toddler:0,total:182,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:4,dov:'2025-04-24',name:'MN Happy Smile (MN Thiên Hà Xanh)',child:57,adult:11,toddler:0,total:68,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:4,dov:'2025-04-25',name:'Happy Smile',child:283,adult:43,toddler:0,total:326,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:5,dov:'2025-05-07',name:'Happy Smile 1',child:114,adult:54,toddler:25,total:193,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:5,dov:'2025-05-07',name:'Happy Smile 2',child:45,adult:5,toddler:0,total:50,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:5,dov:'2025-05-07',name:'MN Ngôi Sao Việt',child:69,adult:9,toddler:0,total:78,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:5,dov:'2025-05-08',name:'Happy Smile',child:323,adult:35,toddler:0,total:358,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:5,dov:'2025-05-10',name:'MN Song ngữ Nhật Anh',child:46,adult:62,toddler:0,total:108,type:'Kindergarten',sector:'Public',agency:'Lương Sơn Tour'},
+  {year:2025,month:5,dov:'2025-05-13',name:'Happy Smile',child:271,adult:36,toddler:0,total:307,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:5,dov:'2025-05-14',name:'Lớp 3G Trường TH Thực nghiệm',child:45,adult:7,toddler:1,total:53,type:'School',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:5,dov:'2025-05-15',name:'Happy Smile',child:148,adult:34,toddler:0,total:182,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:5,dov:'2025-05-15',name:'MN Smile kids',child:75,adult:9,toddler:0,total:84,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:5,dov:'2025-05-17',name:'Lớp 1B0- Trường Ngôi Sao Hà Nội',child:35,adult:9,toddler:0,total:44,type:'School',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:5,dov:'2025-05-18',name:'Ngôi sao Hoàng Mai',child:38,adult:28,toddler:2,total:68,type:'School',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:5,dov:'2025-05-21',name:'MN Khu Vườn Nhỏ',child:20,adult:12,toddler:6,total:38,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:5,dov:'2025-05-25',name:'Happy Smile 1',child:42,adult:30,toddler:1,total:73,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:5,dov:'2025-05-25',name:'Happy Smile 2',child:37,adult:29,toddler:0,total:66,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:5,dov:'2025-05-25',name:'STEAME Kosmo',child:31,adult:23,toddler:0,total:54,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:5,dov:'2025-05-25',name:'Happy Smille 3',child:32,adult:5,toddler:0,total:37,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:5,dov:'2025-05-27',name:'Tiểu học Phượng Dực',child:176,adult:36,toddler:0,total:212,type:'School',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:5,dov:'2025-05-28',name:'MN Ánh Mặt Trời + Bông Mai',child:41,adult:10,toddler:0,total:51,type:'Kindergarten',sector:'Private',agency:'Happy Smile'},
+  {year:2025,month:5,dov:'2025-05-28',name:'Lớp 5a3 TH Đình Bảng',child:42,adult:10,toddler:0,total:52,type:'School',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:5,dov:'2025-05-31',name:'Ngôi nhà Mới',child:31,adult:24,toddler:0,total:55,type:'Kindergarten',sector:'Private',agency:'Happy Smile'},
+  {year:2025,month:6,dov:'2025-06-18',name:'MN Mặt Trời - Hà Đông',child:63,adult:12,toddler:0,total:75,type:'Kindergarten',sector:'Private',agency:'Anh Quân Travel'},
+  {year:2025,month:7,dov:'2025-07-04',name:'MN Kitten - Hà Đông',child:240,adult:50,toddler:0,total:290,type:'Kindergarten',sector:'Private',agency:'Anh Quân Travel'},
+  {year:2025,month:7,dov:'2025-07-04',name:'MN Vườn Ươm Hạnh Phúc',child:80,adult:26,toddler:29,total:135,type:'Kindergarten',sector:'Private',agency:'Anh Quân Travel'},
+  {year:2025,month:7,dov:'2025-07-15',name:'MN Kid Smile',child:184,adult:28,toddler:0,total:212,type:'Kindergarten',sector:'Private',agency:'Anh Quân Travel'},
+  {year:2025,month:7,dov:'2025-07-15',name:'MN First step',child:59,adult:14,toddler:0,total:73,type:'Kindergarten',sector:'Private',agency:'Anh Quân Travel'},
+  {year:2025,month:7,dov:'2025-07-16',name:'Mn Kid House',child:292,adult:45,toddler:0,total:337,type:'Kindergarten',sector:'Private',agency:'Anh Quân Travel'},
+  {year:2025,month:7,dov:'2025-07-17',name:'Trường Mầm Non Tuệ Phúc',child:24,adult:8,toddler:0,total:32,type:'Kindergarten',sector:'Private',agency:'Anh Quân Travel'},
+  {year:2025,month:7,dov:'2025-07-17',name:'MN Học viện trẻ thơ - Hà Đông',child:49,adult:9,toddler:0,total:58,type:'Kindergarten',sector:'Private',agency:'Anh Quân Travel'},
+  {year:2025,month:7,dov:'2025-07-17',name:'MN FBK Hà Đông',child:48,adult:14,toddler:0,total:62,type:'Kindergarten',sector:'Private',agency:'Anh Quân Travel'},
+  {year:2025,month:7,dov:'2025-07-18',name:'MN Iris',child:40,adult:17,toddler:0,total:57,type:'Kindergarten',sector:'Private',agency:'Anh Quân Travel'},
+  {year:2025,month:7,dov:'2025-07-25',name:'Fis',child:57,adult:17,toddler:4,total:78,type:'Kindergarten',sector:'Private',agency:'Anh Quân Travel'},
+  {year:2025,month:7,dov:'2025-07-29',name:'Mầm non Hoa Linh - Hà Đông',child:282,adult:37,toddler:0,total:319,type:'Kindergarten',sector:'Private',agency:'Anh Quân Travel'},
+  {year:2025,month:7,dov:'2025-07-30',name:'MN Hugo Kids - Hà Đông',child:80,adult:15,toddler:0,total:95,type:'Kindergarten',sector:'Private',agency:'Anh Quân Travel'},
+  {year:2025,month:7,dov:'2025-07-30',name:'MN Galaxy - Hà Đông',child:104,adult:16,toddler:0,total:120,type:'Kindergarten',sector:'Private',agency:'Anh Quân Travel'},
+  {year:2025,month:8,dov:'2025-08-08',name:'MN Ước Mơ',child:36,adult:7,toddler:5,total:48,type:'Kindergarten',sector:'Private',agency:'Anh Quân Travel'},
+  {year:2025,month:8,dov:'2025-08-14',name:'MN Thánh Gióng',child:59,adult:61,toddler:55,total:175,type:'Kindergarten',sector:'Private',agency:'Anh Quân Travel'},
+  {year:2025,month:8,dov:'2025-08-14',name:'MN Hương Sen',child:37,adult:4,toddler:0,total:41,type:'Kindergarten',sector:'Private',agency:'Anh Quân Travel'},
+  {year:2025,month:8,dov:'2025-08-15',name:'MN Sora',child:22,adult:5,toddler:0,total:27,type:'Kindergarten',sector:'Private',agency:'Anh Quân Travel'},
+  {year:2025,month:8,dov:'2025-08-15',name:'MN Heiwa',child:49,adult:11,toddler:0,total:60,type:'Kindergarten',sector:'Private',agency:'Anh Quân Travel'},
+  {year:2025,month:8,dov:'2025-08-15',name:'MN Lalaland Preschool',child:46,adult:8,toddler:0,total:54,type:'Kindergarten',sector:'Private',agency:'Anh Quân Travel'},
+  {year:2025,month:8,dov:'2025-08-19',name:'MN Timeway',child:159,adult:22,toddler:0,total:181,type:'Kindergarten',sector:'Private',agency:'Anh Quân Travel'},
+  {year:2025,month:8,dov:'2025-08-22',name:'MN Ngôi nhà Hạnh Phúc',child:54,adult:54,toddler:0,total:108,type:'Kindergarten',sector:'Private',agency:'Anh Quân Travel'},
+  {year:2025,month:9,dov:'2025-09-18',name:'MN Trăng Đỏ',child:87,adult:16,toddler:0,total:103,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2025,month:9,dov:'2025-09-19',name:'MN Mipec 2',child:39,adult:10,toddler:13,total:62,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2025,month:9,dov:'2025-09-22',name:'MN Việt Nhật Doremon + Vườn Trẻ Thơ',child:32,adult:7,toddler:0,total:39,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2025,month:9,dov:'2025-09-22',name:'MN Họa Mi',child:86,adult:15,toddler:0,total:101,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2025,month:10,dov:'2025-10-21',name:'Happy Smile',child:81,adult:21,toddler:0,total:102,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:10,dov:'2025-10-22',name:'MN Vĩnh Tuy',child:206,adult:41,toddler:0,total:247,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:10,dov:'2025-10-23',name:'MN Phú Thượng',child:249,adult:40,toddler:0,total:289,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:10,dov:'2025-10-24',name:'Tiểu học Hiến Nam',child:913,adult:188,toddler:0,total:1101,type:'School',sector:'Public',agency:'Phương Việt Travel'},
+  {year:2025,month:10,dov:'2025-10-28',name:'Tiểu học Cát Quế B',child:373,adult:32,toddler:0,total:405,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:10,dov:'2025-10-29',name:'MN Xuân La',child:390,adult:47,toddler:0,total:437,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:10,dov:'2025-10-30',name:'MN Bình Minh - Cầu Giấy',child:385,adult:54,toddler:0,total:439,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:10,dov:'2025-10-30',name:'Happy Smile 1',child:174,adult:32,toddler:0,total:206,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:10,dov:'2025-10-31',name:'Happy Smile 2',child:139,adult:24,toddler:0,total:163,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:11,dov:'2025-11-03',name:'MN Tứ Liên',child:288,adult:43,toddler:0,total:331,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:11,dov:'2025-11-04',name:'MN Happy Smile',child:261,adult:51,toddler:0,total:312,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:11,dov:'2025-11-05',name:'MG Bạch Mai',child:93,adult:22,toddler:0,total:115,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:11,dov:'2025-11-05',name:'Mn Ngô Thì Nhậm',child:149,adult:31,toddler:0,total:180,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:11,dov:'2025-11-05',name:'MN Tuổi Thơ',child:332,adult:44,toddler:0,total:376,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:11,dov:'2025-11-07',name:'MN Dịch Vọng Hậu',child:343,adult:45,toddler:0,total:388,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:11,dov:'2025-11-10',name:'MN Lê Đại Hành',child:198,adult:51,toddler:0,total:249,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:11,dov:'2025-11-12',name:'MN Việt Ý',child:50,adult:9,toddler:6,total:65,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2025,month:11,dov:'2025-11-12',name:'MN Việt Hà',child:46,adult:8,toddler:0,total:54,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2025,month:11,dov:'2025-11-17',name:'MN Sơn Ca',child:297,adult:44,toddler:0,total:341,type:'Kindergarten',sector:'Public',agency:'Hạnh Phúc Tourism'},
+  {year:2025,month:11,dov:'2025-11-18',name:'MN Thanh Trì',child:131,adult:25,toddler:0,total:156,type:'Kindergarten',sector:'Public',agency:'Kinh Bắc Travel'},
+  {year:2025,month:11,dov:'2025-11-18',name:'MN Bright Kids',child:20,adult:5,toddler:4,total:29,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2025,month:11,dov:'2025-11-19',name:'MN Blue Stars',child:102,adult:15,toddler:0,total:117,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2025,month:11,dov:'2025-11-24',name:'MN EGA',child:36,adult:7,toddler:0,total:43,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2025,month:11,dov:'2025-11-24',name:'MN Chắp cánh Thiên thần',child:35,adult:8,toddler:4,total:47,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2025,month:11,dov:'2025-11-24',name:'MN Trương Định',child:73,adult:27,toddler:0,total:100,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:11,dov:'2025-11-24',name:'MN Kids Garden',child:227,adult:30,toddler:15,total:272,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2025,month:11,dov:'2025-11-25',name:'MN Trần Phú',child:352,adult:50,toddler:0,total:402,type:'Kindergarten',sector:'Public',agency:'Hạnh Phúc Tourism'},
+  {year:2025,month:11,dov:'2025-11-25',name:'MN Vĩnh Hưng',child:420,adult:50,toddler:0,total:470,type:'Kindergarten',sector:'Public',agency:'Hạnh Phúc Tourism'},
+  {year:2025,month:11,dov:'2025-11-28',name:'MN Kinh Bắc',child:68,adult:10,toddler:0,total:78,type:'Kindergarten',sector:'Public',agency:'Kinh Bắc Travel'},
+  {year:2025,month:12,dov:'2025-12-01',name:'MN Nhật Tảo',child:358,adult:49,toddler:0,total:407,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:12,dov:'2025-12-02',name:'MN BiBi',child:73,adult:14,toddler:0,total:87,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:12,dov:'2025-12-02',name:'MN Cổ Nhuế 1',child:172,adult:27,toddler:0,total:199,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:12,dov:'2025-12-03',name:'MN Đô Thị Sài Đồng',child:189,adult:35,toddler:0,total:224,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:12,dov:'2025-12-04',name:'MN Mai Động',child:353,adult:60,toddler:0,total:413,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:12,dov:'2025-12-05',name:'MN Yên Hòa',child:211,adult:57,toddler:0,total:268,type:'Kindergarten',sector:'Public',agency:'Kinh Bắc Travel'},
+  {year:2025,month:12,dov:'2025-12-05',name:'MN Nguyễn Công Trứ',child:52,adult:16,toddler:0,total:68,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:12,dov:'2025-12-08',name:'MN Đình Bảng 1',child:90,adult:9,toddler:0,total:99,type:'School',sector:'Public',agency:'Kinh Bắc Travel'},
+  {year:2025,month:12,dov:'2025-12-09',name:'MN Đình Bảng 2',child:137,adult:21,toddler:0,total:158,type:'School',sector:'Public',agency:'Kinh Bắc Travel'},
+  {year:2025,month:12,dov:'2025-12-10',name:'MN Vân Hà',child:76,adult:15,toddler:18,total:109,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2025,month:12,dov:'2025-12-10',name:'MN Hope',child:99,adult:74,toddler:0,total:173,type:'Kindergarten',sector:'Private',agency:'NewGen'},
+  {year:2025,month:12,dov:'2025-12-11',name:'TH Tân Minh',child:437,adult:26,toddler:0,total:463,type:'School',sector:'Public',agency:'Hải Hà Travel'},
+  {year:2025,month:12,dov:'2025-12-12',name:'MN Ngôi sao xanh',child:57,adult:10,toddler:0,total:67,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2025,month:12,dov:'2025-12-16',name:'TH Tú Sơn - Hải Phòng',child:467,adult:34,toddler:0,total:501,type:'School',sector:'Public',agency:'Skill Development'},
+  {year:2025,month:12,dov:'2025-12-22',name:'MN Thảo Linh',child:73,adult:13,toddler:0,total:86,type:'Kindergarten',sector:'Private',agency:'NewGen'},
+  {year:2025,month:12,dov:'2025-12-23',name:'MN 20/10 - HS',child:138,adult:38,toddler:0,total:176,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2025,month:12,dov:'2025-12-24',name:'MN Giving Tree',child:89,adult:19,toddler:0,total:108,type:'Kindergarten',sector:'Private',agency:'NewGen'},
+  {year:2025,month:12,dov:'2025-12-25',name:'TH Dương Liễu B',child:330,adult:37,toddler:0,total:367,type:'School',sector:'Public',agency:'Happy Smile'},
+  {year:2026,month:1,dov:'2026-01-08',name:'MN FIS - Ngoại Giao Đoàn',child:49,adult:17,toddler:5,total:71,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2026,month:1,dov:'2026-01-13',name:'MN B',child:164,adult:33,toddler:0,total:197,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2026,month:1,dov:'2026-01-15',name:'MN Hanoi Little Star',child:51,adult:13,toddler:24,total:88,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2026,month:1,dov:'2026-01-15',name:'MN Trí Đức',child:64,adult:10,toddler:9,total:83,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2026,month:1,dov:'2026-01-16',name:'TH Hồng Thái - Phú Xuyên',child:325,adult:39,toddler:0,total:364,type:'School',sector:'Public',agency:'Hải Hà Travel'},
+  {year:2026,month:1,dov:'2026-01-20',name:'MN Những thủ lĩnh nhỏ',child:67,adult:10,toddler:0,total:77,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2026,month:1,dov:'2026-01-21',name:'MN Bibo House & MN Home Academy',child:114,adult:34,toddler:0,total:148,type:'Kindergarten',sector:'Private',agency:'Minh Trung'},
+  {year:2026,month:1,dov:'2026-01-27',name:'MN Việt Hàn IQ',child:37,adult:7,toddler:0,total:44,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
+  {year:2026,month:3,dov:'2026-03-06',name:'TH Phú Minh',child:410,adult:42,toddler:0,total:452,type:'School',sector:'Public',agency:'Anh Quân Travel'},
+  {year:2026,month:3,dov:'2026-03-09',name:'Mn Hoa Anh Đào',child:42,adult:16,toddler:0,total:58,type:'Kindergarten',sector:'Public',agency:'Kinh Bắc Travel'},
+  {year:2026,month:3,dov:'2026-03-11',name:'TH Chuyên Mỹ',child:375,adult:104,toddler:0,total:479,type:'School',sector:'Public',agency:'Anh Quân Travel'},
+  {year:2026,month:3,dov:'2026-03-12',name:'TH Văn Võ',child:471,adult:51,toddler:0,total:522,type:'School',sector:'Public',agency:'Hải Hà Travel'},
+  {year:2026,month:3,dov:'2026-03-16',name:'MN Happy Smile 1',child:380,adult:64,toddler:0,total:444,type:'School',sector:'Public',agency:'Happy Smile'},
+  {year:2026,month:3,dov:'2026-03-16',name:'MN Happy Smile 2',child:91,adult:22,toddler:0,total:113,type:'School',sector:'Public',agency:'Happy Smile'},
+  {year:2026,month:3,dov:'2026-03-18',name:'MN Tiên Phong',child:127,adult:22,toddler:0,total:149,type:'Kindergarten',sector:'Public',agency:'Đại Khánh'},
+  {year:2026,month:3,dov:'2026-03-19',name:'MN Ngôi nhà trẻ thơ Montessori',child:126,adult:19,toddler:0,total:145,type:'Kindergarten',sector:'Private',agency:'Tripify'},
+  {year:2026,month:3,dov:'2026-03-20',name:'MN Happy Smile 3',child:363,adult:46,toddler:0,total:409,type:'School',sector:'Public',agency:'Happy Smile'},
+  {year:2026,month:3,dov:'2026-03-20',name:'TH Thống Nhất',child:358,adult:49,toddler:0,total:407,type:'School',sector:'Public',agency:'Anh Quân Travel'},
+  {year:2026,month:3,dov:'2026-03-23',name:'MN Lucita',child:22,adult:8,toddler:13,total:43,type:'Kindergarten',sector:'Private',agency:'Tripify'},
+  {year:2026,month:3,dov:'2026-03-24',name:'MN Quang Trung',child:110,adult:20,toddler:0,total:130,type:'Kindergarten',sector:'Public',agency:'Vietnam Global'},
+  {year:2026,month:3,dov:'2026-03-26',name:'MN Sao Khuê',child:268,adult:42,toddler:0,total:310,type:'Kindergarten',sector:'Public',agency:'Cánh Buồm Xanh'},
+  {year:2026,month:3,dov:'2026-03-26',name:'Mn Happy Smile 6',child:191,adult:22,toddler:0,total:213,type:'School',sector:'Public',agency:'Happy Smile'},
+  {year:2026,month:3,dov:'2026-03-27',name:'MN Bình Minh',child:500,adult:80,toddler:0,total:580,type:'Kindergarten',sector:'Public',agency:'Tân Á'},
+  {year:2026,month:3,dov:'2026-03-30',name:'MN Dịch Vọng',child:300,adult:0,toddler:0,total:300,type:'Kindergarten',sector:'Public',agency:'Kinh Bắc Travel'},
+  {year:2026,month:3,dov:'2026-03-30',name:'Mn Happy Smile 7',child:500,adult:0,toddler:0,total:500,type:'School',sector:'Public',agency:'Happy Smile'},
+  {year:2026,month:3,dov:'2026-03-30',name:'MN Duyên Thái',child:100,adult:0,toddler:0,total:100,type:'Kindergarten',sector:'Public',agency:'Hải Hà Travel'},
+  {year:2026,month:4,dov:'2026-04-02',name:'MN Hồng Thái',child:250,adult:0,toddler:0,total:250,type:'Kindergarten',sector:'Public',agency:'HNTravel'},
+  {year:2026,month:4,dov:'2026-04-03',name:'Mn Happy Smile 1',child:350,adult:0,toddler:0,total:350,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2026,month:4,dov:'2026-04-03',name:'MN Dũng Tiến',child:100,adult:0,toddler:0,total:100,type:'Kindergarten',sector:'Public',agency:'Anh Quân Travel'},
+  {year:2026,month:4,dov:'2026-04-03',name:'MN Hà Hồi',child:58,adult:12,toddler:0,total:70,type:'Kindergarten',sector:'Public',agency:'Hải Hà Travel'},
+  {year:2026,month:4,dov:'2026-04-06',name:'MN Happy Smile 2',child:400,adult:0,toddler:0,total:400,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2026,month:4,dov:'2026-04-07',name:'MN Happy Smile 3',child:600,adult:0,toddler:0,total:600,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2026,month:4,dov:'2026-04-08',name:'MN Kinh Bắc 1',child:150,adult:0,toddler:0,total:150,type:'Kindergarten',sector:'Public',agency:'Kinh Bắc Travel'},
+  {year:2026,month:4,dov:'2026-04-08',name:'MN Kinh Bắc 2',child:250,adult:0,toddler:0,total:250,type:'Kindergarten',sector:'Public',agency:'Kinh Bắc Travel'},
+  {year:2026,month:4,dov:'2026-04-08',name:'MN Hoa Hồng',child:100,adult:50,toddler:0,total:150,type:'Kindergarten',sector:'Public',agency:'Star Travel'},
+  {year:2026,month:4,dov:'2026-04-09',name:'MN Kinh Bắc 3',child:350,adult:0,toddler:0,total:350,type:'Kindergarten',sector:'Public',agency:'Kinh Bắc Travel'},
+  {year:2026,month:4,dov:'2026-04-09',name:'MN Cẩm Lĩnh B',child:60,adult:0,toddler:0,total:60,type:'Kindergarten',sector:'Public',agency:'An Thành Travel'},
+  {year:2026,month:4,dov:'2026-04-09',name:'TH Hòa Sơn',child:200,adult:32,toddler:0,total:232,type:'School',sector:'Public',agency:'Lương Sơn Tour'},
+  {year:2026,month:4,dov:'2026-04-10',name:'MN Kinh Bắc 4',child:150,adult:0,toddler:0,total:150,type:'Kindergarten',sector:'Public',agency:'Kinh Bắc Travel'},
+  {year:2026,month:4,dov:'2026-04-10',name:'MN Happy Smile 4',child:500,adult:0,toddler:0,total:500,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2026,month:4,dov:'2026-04-14',name:'MN Haruki',child:20,adult:8,toddler:5,total:33,type:'Kindergarten',sector:'Private',agency:'Tripify'},
+  {year:2026,month:4,dov:'2026-04-14',name:'MN Hoa Thuỷ Tiên',child:55,adult:10,toddler:0,total:65,type:'Kindergarten',sector:'Private',agency:'Minh Trung'},
+  {year:2026,month:4,dov:'2026-04-14',name:'MN Xứ Sở Thần Tiên',child:45,adult:6,toddler:0,total:51,type:'Kindergarten',sector:'Private',agency:'Minh Trung'},
+  {year:2026,month:4,dov:'2026-04-14',name:'MN Ban Mai',child:70,adult:0,toddler:0,total:70,type:'Kindergarten',sector:'Private',agency:'Minh Trung'},
+  {year:2026,month:4,dov:'2026-04-14',name:'MN Chí Đạo',child:60,adult:0,toddler:0,total:60,type:'Kindergarten',sector:'Public',agency:'Star Travel'},
+  {year:2026,month:4,dov:'2026-04-15',name:'MN Happy Smile 5',child:400,adult:0,toddler:0,total:400,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2026,month:4,dov:'2026-04-16',name:'MN Happy Smile 6',child:400,adult:0,toddler:0,total:400,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2026,month:4,dov:'2026-04-17',name:'MN Tương Mai',child:350,adult:0,toddler:0,total:350,type:'Kindergarten',sector:'Public',agency:'Kinh Bắc Travel'},
+  {year:2026,month:4,dov:'2026-04-21',name:'MN Kinh Bắc 5',child:200,adult:0,toddler:0,total:200,type:'Kindergarten',sector:'Public',agency:'Kinh Bắc Travel'},
+  {year:2026,month:5,dov:'2026-05-05',name:'Mn Happy Smile 1',child:500,adult:0,toddler:0,total:500,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2026,month:5,dov:'2026-05-06',name:'Mn Happy Smile 2',child:300,adult:0,toddler:0,total:300,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2026,month:5,dov:'2026-05-06',name:'MN Kinh Bắc 1',child:200,adult:0,toddler:0,total:200,type:'Kindergarten',sector:'Public',agency:'Kinh Bắc Travel'},
+  {year:2026,month:5,dov:'2026-05-08',name:'MN Anh Quân 1',child:500,adult:0,toddler:0,total:500,type:'Kindergarten',sector:'Public',agency:'Anh Quân Travel'},
+  {year:2026,month:5,dov:'2026-05-12',name:'MN Kinh Bắc 2',child:300,adult:0,toddler:0,total:300,type:'Kindergarten',sector:'Public',agency:'Kinh Bắc Travel'},
+  {year:2026,month:5,dov:'2026-05-12',name:'Mn Happy Smile 3',child:500,adult:0,toddler:0,total:500,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2026,month:5,dov:'2026-05-13',name:'MN Kinh Bắc 2',child:300,adult:0,toddler:0,total:300,type:'Kindergarten',sector:'Public',agency:'Kinh Bắc Travel'},
+  {year:2026,month:5,dov:'2026-05-15',name:'Mn Happy Smile 4',child:200,adult:0,toddler:0,total:200,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2026,month:5,dov:'2026-05-15',name:'TH Anh Quân',child:200,adult:0,toddler:0,total:200,type:'Kindergarten',sector:'Public',agency:'Anh Quân Travel'},
+  {year:2026,month:5,dov:'2026-05-18',name:'MN Kinh Bắc 3',child:500,adult:0,toddler:0,total:500,type:'Kindergarten',sector:'Public',agency:'Kinh Bắc Travel'},
+];
+
+const directData = [
+  {year:2026,month:3,dov:'2026-03-03',name:'MN Happy Preschool - Văn Miếu',child:53,adult:7,toddler:0,total:60,type:'Kindergarten',sector:'Private'},
+  {year:2026,month:3,dov:'2026-03-04',name:'MN Vinschool Harmony + Riverside',child:362,adult:67,toddler:0,total:429,type:'Kindergarten',sector:'Private'},
+  {year:2026,month:3,dov:'2026-03-05',name:'MN Vinschool Harmony + Riverside',child:363,adult:56,toddler:0,total:419,type:'Kindergarten',sector:'Private'},
+  {year:2026,month:3,dov:'2026-03-07',name:'TH Kim Xá',child:435,adult:102,toddler:0,total:537,type:'School',sector:'Public'},
+  {year:2026,month:3,dov:'2026-03-10',name:'MN Vinschool Royal City R5',child:172,adult:33,toddler:0,total:205,type:'Kindergarten',sector:'Private'},
+  {year:2026,month:3,dov:'2026-03-10',name:'MN Nhật Bản',child:20,adult:2,toddler:0,total:22,type:'Kindergarten',sector:'Private'},
+  {year:2026,month:3,dov:'2026-03-12',name:'MN Bình Minh',child:36,adult:4,toddler:0,total:40,type:'Kindergarten',sector:'Private'},
+  {year:2026,month:3,dov:'2026-03-13',name:'ISPH School',child:38,adult:7,toddler:0,total:45,type:'School',sector:'International'},
+  {year:2026,month:3,dov:'2026-03-17',name:'MN Vinschool Smart City',child:210,adult:48,toddler:0,total:258,type:'Kindergarten',sector:'Private'},
+  {year:2026,month:3,dov:'2026-03-18',name:'TH Dewey Cầu Giấy',child:199,adult:26,toddler:0,total:225,type:'School',sector:'Private'},
+  {year:2026,month:3,dov:'2026-03-18',name:'MN Dream Kindergaten',child:26,adult:11,toddler:10,total:47,type:'Kindergarten',sector:'Private'},
+  {year:2026,month:3,dov:'2026-03-21',name:'MN Tuấn Khánh',child:60,adult:68,toddler:0,total:128,type:'Kindergarten',sector:'Private'},
+  {year:2026,month:3,dov:'2026-03-23',name:'MN Erich',child:42,adult:36,toddler:0,total:78,type:'Kindergarten',sector:'Private'},
+  {year:2026,month:3,dov:'2026-03-23',name:'MN Mapble Bear LVL',child:20,adult:4,toddler:0,total:24,type:'Kindergarten',sector:'Private'},
+  {year:2026,month:3,dov:'2026-03-23',name:'MN Sao Mai Bắc Ninh',child:284,adult:47,toddler:0,total:331,type:'Kindergarten',sector:'Private'},
+  {year:2026,month:3,dov:'2026-03-31',name:'TH Vinschool Times City - Grade 1',child:502,adult:40,toddler:0,total:542,type:'School',sector:'Private'},
+  {year:2026,month:4,dov:'2026-04-01',name:'TH Vinschool Times City Grade 2',child:500,adult:41,toddler:0,total:541,type:'School',sector:'Private'},
+  {year:2026,month:4,dov:'2026-04-02',name:'TH Brighton College - Grade 2',child:32,adult:5,toddler:0,total:37,type:'School',sector:'International'},
+  {year:2026,month:4,dov:'2026-04-02',name:'MN AMG',child:71,adult:18,toddler:5,total:94,type:'Kindergarten',sector:'Private'},
+  {year:2026,month:4,dov:'2026-04-02',name:'MN Sea Sunshine',child:42,adult:20,toddler:0,total:62,type:'Kindergarten',sector:'Private'},
+  {year:2026,month:4,dov:'2026-04-07',name:'MN Vietland',child:90,adult:0,toddler:0,total:90,type:'Kindergarten',sector:'Private'},
+  {year:2026,month:4,dov:'2026-04-09',name:'TH Nobel School',child:21,adult:4,toddler:0,total:25,type:'School',sector:'Private'},
+  {year:2026,month:4,dov:'2026-04-13',name:'MN FIS Cầu Giấy',child:80,adult:0,toddler:0,total:80,type:'Kindergarten',sector:'Private'},
+  {year:2026,month:4,dov:'2026-04-17',name:'MN Chungdahm',child:30,adult:0,toddler:0,total:30,type:'Kindergarten',sector:'International'},
+];
+
+const colors = ['#3b82f6','#f59e0b','#10b981','#a78bfa','#ef4444','#f97316','#14b8a6','#ec4899','#6366f1','#84cc16','#06b6d4','#d97706'];
+
+// ===== INIT =====
+function init() {
+  renderAgencyBars();
+  renderDonut();
+  renderYearlyChart();
+  renderTypeBars();
+  initFilters();
+  initCompare();
+  updateDayOptions();
+  document.getElementById('grp-date-from').value = '';
+  document.getElementById('grp-date-to').value = '';
+  renderWeekly();
+  renderRanking();
+  renderGroupList();
+  renderDirectDetail();
+  updateThisNextWeek();
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  event.currentTarget.classList.add('active');
+  // 비교 탭 진입 시 차트 재렌더
+  if(name === 'compare') {
+    requestAnimationFrame(() => renderCompare());
+  }
+}
+
+// ===== OVERVIEW =====
+function renderAgencyBars() {
+  const sorted = [...agencyData].sort((a,b) => (b.v2024+b.v2025+b.v2026) - (a.v2024+a.v2025+a.v2026));
+  const max = sorted[0].v2024+sorted[0].v2025+sorted[0].v2026;
+  const container = document.getElementById('agency-bars');
+  container.innerHTML = sorted.filter(a => (a.v2024+a.v2025+a.v2026) > 0).map((a,i) => {
+    const total = a.v2024+a.v2025+a.v2026;
+    const pct = (total/max*100).toFixed(1);
+    return `<div class="bar-item">
+      <div class="bar-label">
+        <span class="bar-name">${a.name}</span>
+        <span class="bar-val">${total.toLocaleString()}</span>
+      </div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${colors[i%colors.length]}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function renderDonut() {
+  const panel = document.getElementById('donut-panel');
+  const canvas = document.getElementById('donut');
+  const ctx = canvas.getContext('2d');
+
+  const panelW = Math.max(160, panel.clientWidth - 40);
+  const size = Math.max(160, Math.min(300, panelW));
+  canvas.width = size; canvas.height = size;
+  const cx = size/2, cy = size/2;
+  const r = size*0.42, innerR = size*0.22;
+
+  const sorted = [...agencyData].sort((a,b) => (b.v2024+b.v2025+b.v2026) - (a.v2024+a.v2025+a.v2026));
+  const top5 = sorted.slice(0,5);
+  const otherTotal = sorted.slice(5).reduce((s,a) => s+(a.v2024+a.v2025+a.v2026), 0);
+  const grandTotal = sorted.reduce((s,a) => s+(a.v2024+a.v2025+a.v2026), 0);
+  const items = [...top5.map(a => ({name:a.name, val:a.v2024+a.v2025+a.v2026})), {name:'기타', val:otherTotal}];
+
+  let startAngle = -Math.PI/2;
+  items.forEach((item,i) => {
+    const angle = (item.val/grandTotal)*Math.PI*2;
+    ctx.beginPath(); ctx.moveTo(cx,cy);
+    ctx.arc(cx, cy, r, startAngle, startAngle+angle);
+    ctx.closePath();
+    ctx.fillStyle = colors[i]; ctx.fill();
+    ctx.strokeStyle = '#111827'; ctx.lineWidth = 1.5; ctx.stroke();
+    startAngle += angle;
+  });
+  ctx.beginPath(); ctx.arc(cx, cy, innerR, 0, Math.PI*2);
+  ctx.fillStyle = '#111827'; ctx.fill();
+
+  const fontSize = Math.max(11, Math.round(size*0.055));
+  ctx.fillStyle = '#60a5fa';
+  ctx.font = `bold ${fontSize}px JetBrains Mono`;
+  ctx.textAlign = 'center';
+  ctx.fillText('51,501', cx, cy + 4);
+  ctx.fillStyle = '#8899b0';
+  ctx.font = `${Math.max(8, fontSize-3)}px Noto Sans KR`;
+  ctx.fillText('총 방문객', cx, cy + fontSize + 4);
+
+  const legend = document.getElementById('donut-legend');
+  legend.innerHTML = items.map((item,i) => `
+    <div class="legend-item" style="justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:6px;flex:1">
+        <div class="legend-dot" style="background:${colors[i]};width:10px;height:10px"></div>
+        <div class="legend-label" style="font-size:12px">${item.name}</div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <span style="font-family:JetBrains Mono;font-size:11px;color:var(--text2)">${item.val.toLocaleString()}</span>
+        <span style="font-family:JetBrains Mono;font-size:11px;color:${colors[i]};font-weight:600;min-width:38px;text-align:right">${(item.val/grandTotal*100).toFixed(1)}%</span>
+      </div>
+    </div>`).join('');
+}
+
+function renderYearlyChart() {
+  const panel = document.getElementById('yearly-panel');
+  const canvas = document.getElementById('yearly-chart');
+  const ctx = canvas.getContext('2d');
+  const W = Math.max(200, panel.clientWidth - 40);
+  const H = Math.max(180, Math.round(W * 0.38));
+  canvas.width = W; canvas.height = H;
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  const monthly2024 = Array(12).fill(0);
+  const monthly2025 = Array(12).fill(0);
+  const monthly2026 = Array(12).fill(0);
+  groupListData.filter(g => g.year===2024).forEach(g => monthly2024[g.month-1] += g.total);
+  groupListData.filter(g => g.year===2025).forEach(g => monthly2025[g.month-1] += g.total);
+  groupListData.filter(g => g.year===2026).forEach(g => monthly2026[g.month-1] += g.total);
+
+  const pad = {l:42,r:12,t:24,b:28};
+  const cW = W-pad.l-pad.r, cH = H-pad.t-pad.b;
+  const maxV = Math.max(...monthly2024, ...monthly2025, ...monthly2026, 1);
+
+  ctx.clearRect(0,0,W,H);
+
+  // Y grid + labels
+  for(let i=0;i<=4;i++) {
+    const y = pad.t + cH - (i/4)*cH;
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+cW,y); ctx.stroke();
+    ctx.fillStyle='#475569'; ctx.font='9px JetBrains Mono'; ctx.textAlign='right';
+    const label = maxV*i/4 >= 1000 ? (maxV*i/4/1000).toFixed(1)+'k' : Math.round(maxV*i/4)+'';
+    ctx.fillText(label, pad.l-4, y+3);
+  }
+
+  // Helper: draw a smooth connected line skipping zeros-only at edges
+  function drawLine(data, color, dash=[]) {
+    const points = data.map((v,i) => ({x: pad.l+(i/11)*cW, y: pad.t+cH-(v/maxV)*cH, v}));
+    ctx.strokeStyle = color; ctx.lineWidth = 2.5; ctx.setLineDash(dash);
+    ctx.beginPath();
+    let started = false;
+    points.forEach((p,i) => {
+      if(p.v === 0 && !started) return; // skip leading zeros
+      if(!started) { ctx.moveTo(p.x, p.y); started=true; }
+      else ctx.lineTo(p.x, p.y);
+    });
+    ctx.stroke();
+    ctx.setLineDash([]);
+    // Dots on data points
+    points.forEach(p => {
+      if(p.v === 0) return;
+      ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
+      ctx.fillStyle = color; ctx.fill();
+    });
+  }
+
+  // 2024 (gray dashed — small values)
+  drawLine(monthly2024, '#94a3b8', [3,3]);
+  // 2025 (blue solid)
+  drawLine(monthly2025, '#60a5fa');
+  // 2026 (gold solid)
+  drawLine(monthly2026, '#f59e0b');
+
+  // Value labels on 2026 dots
+  monthly2026.forEach((v,i) => {
+    if(v===0) return;
+    const x = pad.l+(i/11)*cW;
+    const y = pad.t+cH-(v/maxV)*cH;
+    ctx.fillStyle='#f59e0b'; ctx.font='bold 9px JetBrains Mono'; ctx.textAlign='center';
+    const label = v>=1000?(v/1000).toFixed(1)+'k':v+'';
+    ctx.fillText(label, x, y-8);
+  });
+
+  // X labels
+  ctx.fillStyle='#8899b0'; ctx.font='9px Noto Sans KR'; ctx.textAlign='center';
+  months.forEach((m,i) => {
+    const x = pad.l+(i/11)*cW;
+    ctx.fillText(m, x, H-6);
+  });
+
+  // Legend
+  const legends = [
+    {color:'#94a3b8', label:'2024', dash:true},
+    {color:'#60a5fa', label:'2025', dash:false},
+    {color:'#f59e0b', label:'2026', dash:false},
+  ];
+  legends.forEach((l,i) => {
+    const lx = pad.l + i*60;
+    ctx.setLineDash(l.dash?[3,3]:[]);
+    ctx.strokeStyle=l.color; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(lx,10); ctx.lineTo(lx+16,10); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle='#94a3b8'; ctx.font='9px Noto Sans KR'; ctx.textAlign='left';
+    ctx.fillText(l.label, lx+19, 13);
+  });
+}
+
+function renderTypeBars() {
+  const types = {};
+  groupListData.forEach(g => { types[g.type] = (types[g.type]||0)+g.total; });
+  const sectors = {};
+  groupListData.forEach(g => { sectors[g.sector] = (sectors[g.sector]||0)+g.total; });
+  const maxT = Math.max(...Object.values(types));
+  const maxS = Math.max(...Object.values(sectors));
+  const container = document.getElementById('type-bars');
+  container.innerHTML = '<div style="font-size:10px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px">그룹 유형</div>' +
+    Object.entries(types).map(([k,v],i) => `<div class="bar-item">
+      <div class="bar-label"><span class="bar-name">${k}</span><span class="bar-val">${v.toLocaleString()}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(v/maxT*100).toFixed(1)}%;background:${colors[i]}"></div></div>
+    </div>`).join('') +
+    '<div style="font-size:10px;color:var(--text3);margin:12px 0 8px;text-transform:uppercase;letter-spacing:0.5px">섹터</div>' +
+    Object.entries(sectors).map(([k,v],i) => `<div class="bar-item">
+      <div class="bar-label"><span class="bar-name">${k}</span><span class="bar-val">${v.toLocaleString()}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(v/maxS*100).toFixed(1)}%;background:${colors[i+3]}"></div></div>
+    </div>`).join('');
+}
+
+// ===== FILTERS INIT =====
+function initFilters() {
+  const agencies = [...new Set(groupListData.map(g => g.agency))].sort();
+  const waFilter = document.getElementById('weekly-agency-filter');
+  const gaFilter = document.getElementById('grp-agency');
+  agencies.forEach(a => {
+    [waFilter, gaFilter].forEach(sel => {
+      const opt = document.createElement('option'); opt.value = a; opt.textContent = a;
+      sel.appendChild(opt);
+    });
+  });
+}
+
+// ===== WEEKLY =====
+let currentView = 'weekly';
+function setView(v) {
+  currentView = v;
+  document.getElementById('btn-weekly').classList.toggle('active', v==='weekly');
+  document.getElementById('btn-monthly').classList.toggle('active', v==='monthly');
+  renderWeekly();
+}
+
+function updateThisNextWeek() {
+  let tw = 0, nw = 0;
+  weeklyData.agencies.forEach(a => {
+    tw += weeklyData.data[a][4]||0;
+    nw += weeklyData.data[a][5]||0;
+  });
+  document.getElementById('thisweek-val').textContent = tw.toLocaleString();
+  document.getElementById('nextweek-val').textContent = nw.toLocaleString();
+}
+
+function renderWeekly() {
+  const agFilter = document.getElementById('weekly-agency-filter').value;
+  const yearFilter = document.getElementById('year-filter').value;
+  const table = document.getElementById('weekly-table');
+  
+  if(currentView === 'weekly') {
+    // Weekly table from weeklyData
+    const agencies = agFilter === 'all' ? weeklyData.agencies : [agFilter];
+    const weeks = weeklyData.weeks;
+    const labels = weeklyData.weekLabels;
+    
+    let thead = '<tr><th>에이전시</th>';
+    weeks.forEach((w,i) => {
+      const isThis = i===4, isNext = i===5;
+      thead += `<th class="${isThis?'this-week-col':isNext?'next-week-col':''} weekly-col" style="text-align:right;font-size:9px">${w.replace('_',' ')}</th>`;
+    });
+    thead += '<th style="text-align:right">합계</th></tr>';
+    table.querySelector('thead').innerHTML = thead;
+    
+    let tbody = '';
+    agencies.forEach(ag => {
+      const vals = weeklyData.data[ag];
+      const total = vals.reduce((s,v) => s+v, 0);
+      if(total === 0 && agFilter === 'all') return;
+      tbody += `<tr><td style="font-weight:600">${ag}</td>`;
+      vals.forEach((v,i) => {
+        const isThis = i===4, isNext = i===5;
+        tbody += `<td class="num ${isThis?'this-week-col':isNext?'next-week-col':''}">${v>0?v.toLocaleString():'-'}</td>`;
+      });
+      tbody += `<td class="num" style="font-weight:700;color:var(--text)">${total.toLocaleString()}</td></tr>`;
+    });
+    
+    // Total row
+    tbody += '<tr style="background:rgba(59,130,246,0.06);font-weight:700"><td>합계</td>';
+    weeks.forEach((w,i) => {
+      const total = agencies.reduce((s,ag) => s+(weeklyData.data[ag][i]||0), 0);
+      const isThis = i===4, isNext = i===5;
+      tbody += `<td class="num ${isThis?'this-week-col':isNext?'next-week-col':''}" style="color:var(--accent2)">${total>0?total.toLocaleString():'-'}</td>`;
+    });
+    const grandTotal = agencies.reduce((s,ag) => s+weeklyData.data[ag].reduce((ss,v)=>ss+v,0), 0);
+    tbody += `<td class="num" style="color:var(--gold)">${grandTotal.toLocaleString()}</td></tr>`;
+    table.querySelector('tbody').innerHTML = tbody;
+  } else {
+    // Monthly view from group list
+    const filtered = groupListData.filter(g => {
+      if(agFilter !== 'all' && g.agency !== agFilter) return false;
+      if(yearFilter !== 'all' && g.year !== parseInt(yearFilter)) return false;
+      return true;
+    });
+    const monthMap = {};
+    filtered.forEach(g => {
+      const key = `${g.year}-${String(g.month).padStart(2,'0')}`;
+      monthMap[key] = (monthMap[key]||0)+g.total;
+    });
+    const months = Object.keys(monthMap).sort();
+    let thead = '<tr><th>연-월</th><th style="text-align:right">방문객</th><th style="text-align:right">그룹수</th><th style="text-align:right">월간 점유율</th></tr>';
+    table.querySelector('thead').innerHTML = thead;
+    const grandTotal = Object.values(monthMap).reduce((s,v)=>s+v,0);
+    const groupCounts = {};
+    filtered.forEach(g => { const k=`${g.year}-${String(g.month).padStart(2,'0')}`; groupCounts[k]=(groupCounts[k]||0)+1; });
+    let tbody = months.map(m => {
+      const v = monthMap[m]; const pct = grandTotal>0?(v/grandTotal*100).toFixed(1):0;
+      return `<tr><td class="date">${m}</td><td class="num">${v.toLocaleString()}</td><td class="num">${groupCounts[m]||0}</td>
+      <td><div style="display:flex;align-items:center;gap:8px"><div class="bar-track" style="flex:1;height:6px"><div class="bar-fill" style="width:${pct}%;background:var(--accent)"></div></div><span style="font-family:JetBrains Mono;font-size:10px;color:var(--text3)">${pct}%</span></div></td></tr>`;
+    }).join('');
+    table.querySelector('tbody').innerHTML = tbody;
+  }
+  renderMonthlyChart();
+}
+
+function renderMonthlyChart() {
+  const canvas = document.getElementById('monthly-chart');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.offsetWidth || 600;
+  canvas.width = W; canvas.height = 160;
+  
+  const agFilter = document.getElementById('weekly-agency-filter').value;
+  const yearFilter = document.getElementById('year-filter').value;
+  const filtered = groupListData.filter(g => {
+    if(agFilter !== 'all' && g.agency !== agFilter) return false;
+    if(yearFilter !== 'all' && g.year !== parseInt(yearFilter)) return false;
+    return true;
+  });
+  const monthMap = {};
+  filtered.forEach(g => {
+    const key = `${g.year}-${String(g.month).padStart(2,'0')}`;
+    monthMap[key] = (monthMap[key]||0)+g.total;
+  });
+  const months = Object.keys(monthMap).sort();
+  if(!months.length) return;
+  const vals = months.map(m => monthMap[m]);
+  const maxV = Math.max(...vals, 1);
+  const pad = {l:35,r:10,t:10,b:30};
+  const cW = W-pad.l-pad.r, cH = 160-pad.t-pad.b;
+  const bw = Math.max(4, cW/months.length*0.6);
+  
+  ctx.clearRect(0,0,W,160);
+  for(let i=0;i<=4;i++) {
+    const y = pad.t + cH - (i/4)*cH;
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l+cW, y); ctx.stroke();
+    ctx.fillStyle='#475569'; ctx.font='9px JetBrains Mono'; ctx.textAlign='right';
+    ctx.fillText(((maxV*i/4)/1000).toFixed(0)+'k', pad.l-3, y+4);
+  }
+  months.forEach((m,i) => {
+    const x = pad.l + (i+0.5)/months.length*cW;
+    const h = (vals[i]/maxV)*cH;
+    const y = pad.t+cH-h;
+    const isThis = m.includes('2026-03') || m.includes('2026-04');
+    ctx.fillStyle = isThis ? '#f59e0b' : '#3b82f6';
+    ctx.fillRect(x-bw/2, y, bw, h);
+    ctx.fillStyle='#475569'; ctx.font='8px Noto Sans KR'; ctx.textAlign='center';
+    ctx.fillText(m.slice(5), x, 160-5);
+  });
+}
+
+// ===== RANKING =====
+function renderRanking() {
+  const year = document.getElementById('rank-year').value;
+  const getV = a => year==='2024' ? a.v2024 : year==='2025' ? a.v2025 : year==='2026' ? a.v2026 : a.v2024+a.v2025+a.v2026;
+  const getR = a => year==='2024' ? a.r2024 : year==='2025' ? a.r2025 : year==='2026' ? a.r2026 : a.r2024+a.r2025+a.r2026;
+  
+  const byV = [...agencyData].sort((a,b) => getV(b)-getV(a)).filter(a => getV(a)>0);
+  const byR = [...agencyData].sort((a,b) => getR(b)-getR(a)).filter(a => getR(a)>0);
+  
+  const rankClass = i => i===0?'r1':i===1?'r2':i===2?'r3':'';
+  
+  document.getElementById('rank-visitors').innerHTML = byV.slice(0,10).map((a,i) => `
+    <div class="rank-item">
+      <div class="rank-num ${rankClass(i)}">${i+1}</div>
+      <div class="rank-info">
+        <div class="rank-name">${a.name}</div>
+        <div class="rank-meta">${getV(a).toLocaleString()}명</div>
+      </div>
+      <div class="rank-val">${getV(a).toLocaleString()}</div>
+    </div>`).join('');
+    
+  document.getElementById('rank-reservations').innerHTML = byR.slice(0,10).map((a,i) => `
+    <div class="rank-item">
+      <div class="rank-num ${rankClass(i)}">${i+1}</div>
+      <div class="rank-info">
+        <div class="rank-name">${a.name}</div>
+        <div class="rank-meta">${getR(a)}건</div>
+      </div>
+      <div class="rank-val">${getR(a)}</div>
+    </div>`).join('');
+    
+  // Detail table
+  const tbody = agencyData.sort((a,b) => getV(b)-getV(a)).map(a => {
+    const total = a.v2024+a.v2025+a.v2026;
+    const totalR = a.r2024+a.r2025+a.r2026;
+    const avg = totalR>0 ? Math.round(total/totalR) : 0;
+    return `<tr>
+      <td style="font-weight:600">${a.name}</td>
+      <td class="num">${a.v2024||'-'}</td>
+      <td class="num">${a.v2025>0?a.v2025.toLocaleString():'-'}</td>
+      <td class="num" style="color:var(--gold)">${a.v2026>0?a.v2026.toLocaleString():'-'}</td>
+      <td class="num" style="font-weight:700;color:var(--text)">${total>0?total.toLocaleString():'-'}</td>
+      <td class="num">${a.r2024||'-'}</td>
+      <td class="num">${a.r2025||'-'}</td>
+      <td class="num" style="color:var(--gold)">${a.r2026||'-'}</td>
+      <td class="num">${totalR||'-'}</td>
+      <td class="num">${avg||'-'}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('agency-detail-table').innerHTML = tbody;
+}
+
+// ===== GROUP LIST =====
+function clearDateRange() {
+  document.getElementById('grp-date-from').value = '';
+  document.getElementById('grp-date-to').value = '';
+  renderGroupList();
+}
+
+function setPreset(p) {
+  let from, to;
+  if(p === 'thisMonth') {
+    from = '2026-04-01'; to = '2026-04-30';
+  } else if(p === 'lastMonth') {
+    from = '2026-03-01'; to = '2026-03-31';
+  } else if(p === 'q1_2026') {
+    from = '2026-01-01'; to = '2026-03-31';
+  } else if(p === '2026') {
+    from = '2026-01-01'; to = '2026-12-31';
+  } else if(p === '2025') {
+    from = '2025-01-01'; to = '2025-12-31';
+  } else if(p === '2024') {
+    from = '2024-01-01'; to = '2024-12-31';
+  } else {
+    from = ''; to = '';
+  }
+  document.getElementById('grp-date-from').value = from;
+  document.getElementById('grp-date-to').value = to;
+  renderGroupList();
+}
+
+function onYearChange() { renderGroupList(); }
+function onMonthChange() { renderGroupList(); }
+function updateDayOptions() {}
+
+function renderGroupList() {
+  const ag = document.getElementById('grp-agency').value;
+  const tp = document.getElementById('grp-type').value;
+  const sc = document.getElementById('grp-sector').value;
+  const dateFrom = document.getElementById('grp-date-from').value;
+  const dateTo   = document.getElementById('grp-date-to').value;
+
+  const filtered = groupListData.filter(g => {
+    if(ag !== 'all' && g.agency !== ag) return false;
+    if(tp !== 'all' && g.type !== tp) return false;
+    if(sc !== 'all' && g.sector !== sc) return false;
+    if(dateFrom && g.dov < dateFrom) return false;
+    if(dateTo   && g.dov > dateTo)   return false;
+    return true;
+  }).sort((a,b) => b.dov.localeCompare(a.dov));
+
+  const totalV = filtered.reduce((s,g)=>s+g.total,0);
+  document.getElementById('grp-count').textContent = `총 ${filtered.length}건 · ${totalV.toLocaleString()}명`;
+
+  const sectorBadge = s => s==='Public'?'badge-green':s==='Private'?'badge-blue':'badge-purple';
+  const typeBadge = t => t==='School'?'badge-orange':'badge-teal';
+
+  document.getElementById('group-list-body').innerHTML = filtered.map(g => `
+    <tr>
+      <td class="date">${g.dov}</td>
+      <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${g.name}</td>
+      <td><span class="badge badge-blue">${g.agency}</span></td>
+      <td><span class="badge ${typeBadge(g.type)}">${g.type}</span></td>
+      <td><span class="badge ${sectorBadge(g.sector)}">${g.sector}</span></td>
+      <td class="num">${g.child||'-'}</td>
+      <td class="num">${g.adult||'-'}</td>
+      <td class="num">${g.toddler||'-'}</td>
+      <td class="num" style="font-weight:700;color:var(--text)">${g.total.toLocaleString()}</td>
+    </tr>`).join('');
+
+  // 기간 분석 패널: 항상 표시 (필터 결과가 있을 때)
+  if(filtered.length > 0) {
+    renderDayAnalytics(filtered, dateFrom, dateTo);
+    document.getElementById('day-analytics').style.display = 'block';
+    requestAnimationFrame(() => {
+      observeAnalyticsPanels();
+      // 패널이 실제로 렌더된 뒤 캔버스 재그리기
+      renderDayAnalytics(filtered, dateFrom, dateTo);
+    });
+  } else {
+    document.getElementById('day-analytics').style.display = 'none';
+  }
+}
+
+function renderDayAnalytics(data, dateFrom, dateTo) {
+  // 헤더 레이블
+  let rangeLabel = '전체 기간';
+  if(dateFrom && dateTo) rangeLabel = `${dateFrom} ~ ${dateTo}`;
+  else if(dateFrom) rangeLabel = `${dateFrom} 이후`;
+  else if(dateTo) rangeLabel = `${dateTo} 이전`;
+
+  document.getElementById('day-title-badge').textContent = rangeLabel;
+  document.getElementById('day-analytics-title').textContent = '기간별 심층 분석';
+
+  const totalV = data.reduce((s,g)=>s+g.total,0);
+  const totalC = data.reduce((s,g)=>s+(g.child||0),0);
+  const totalA = data.reduce((s,g)=>s+(g.adult||0),0);
+  const totalT = data.reduce((s,g)=>s+(g.toddler||0),0);
+  const avgSize = data.length ? Math.round(totalV/data.length) : 0;
+  // unique dates
+  const uniqueDates = [...new Set(data.map(g=>g.dov))].length;
+  document.getElementById('day-subtitle').textContent = `${uniqueDates}일 · ${data.length}개 그룹 · ${totalV.toLocaleString()}명`;
+
+  // KPI 4칸
+  const kpiColors = ['blue','gold','green','purple'];
+  const kpis = [
+    {label:'총 방문객', val:totalV.toLocaleString(), sub:`${data.length}개 그룹`},
+    {label:'어린이', val:totalC.toLocaleString(), sub:`${totalV>0?(totalC/totalV*100).toFixed(1):0}%`},
+    {label:'성인 인솔자', val:totalA.toLocaleString(), sub:`${totalV>0?(totalA/totalV*100).toFixed(1):0}%`},
+    {label:'그룹 평균 규모', val:avgSize+'명', sub:`${uniqueDates}일간`},
+  ];
+  document.getElementById('day-kpis').innerHTML = kpis.map((k,i) => `
+    <div class="kpi ${kpiColors[i]}" style="padding:12px">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value ${kpiColors[i]}" style="font-size:26px">${k.val}</div>
+      <div class="kpi-sub"><span>${k.sub}</span></div>
+    </div>`).join('');
+
+  // 그룹별 방문객 바 (상위 15개)
+  const sortedG = [...data].sort((a,b)=>b.total-a.total).slice(0,15);
+  const maxG = sortedG[0]?.total||1;
+  document.getElementById('day-group-bars').innerHTML = sortedG.map((g,i)=>`
+    <div class="bar-item">
+      <div class="bar-label">
+        <span class="bar-name" style="font-size:10px;max-width:155px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${g.name}</span>
+        <span class="bar-val">${g.total}</span>
+      </div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(g.total/maxG*100).toFixed(1)}%;background:${colors[i%colors.length]}"></div></div>
+    </div>`).join('') + (data.length>15?`<div style="font-size:10px;color:var(--text3);margin-top:6px;text-align:center">외 ${data.length-15}개 그룹</div>`:'');
+
+  // 유형별 / 섹터별
+  const types={}, sectors={};
+  data.forEach(g=>{
+    types[g.type]=(types[g.type]||0)+g.total;
+    sectors[g.sector]=(sectors[g.sector]||0)+g.total;
+  });
+  const typeColors={'Kindergarten':'#14b8a6','School':'#f97316'};
+  const sectorColors={'Public':'#10b981','Private':'#3b82f6','International':'#a78bfa'};
+  const maxType=Math.max(...Object.values(types),1);
+  const maxSec=Math.max(...Object.values(sectors),1);
+  document.getElementById('day-type-bars').innerHTML = Object.entries(types).map(([k,v])=>`
+    <div class="bar-item" style="margin-bottom:5px">
+      <div class="bar-label"><span class="bar-name" style="font-size:10px">${k}</span><span class="bar-val">${v.toLocaleString()}</span></div>
+      <div class="bar-track" style="height:6px"><div class="bar-fill" style="width:${(v/maxType*100).toFixed(1)}%;background:${typeColors[k]||'#60a5fa'}"></div></div>
+    </div>`).join('');
+  document.getElementById('day-sector-bars').innerHTML = Object.entries(sectors).map(([k,v])=>`
+    <div class="bar-item" style="margin-bottom:5px">
+      <div class="bar-label"><span class="bar-name" style="font-size:10px">${k}</span><span class="bar-val">${v.toLocaleString()}</span></div>
+      <div class="bar-track" style="height:6px"><div class="bar-fill" style="width:${(v/maxSec*100).toFixed(1)}%;background:${sectorColors[k]||'#60a5fa'}"></div></div>
+    </div>`).join('');
+
+  // 구성비 파이 — 반응형
+  const piePanelEl = document.getElementById('day-pie-panel');
+  const pie = document.getElementById('day-pie');
+  const pctx = pie.getContext('2d');
+  const pieSize = Math.max(120, Math.min(220, Math.max(120, piePanelEl.clientWidth - 44)));
+  pie.width = pieSize; pie.height = pieSize;
+  const pcx = pieSize/2, pcy = pieSize/2;
+  const pr = pieSize*0.43, pInner = pieSize*0.22;
+  pctx.clearRect(0,0,pieSize,pieSize);
+  const pieData = [{label:'어린이',val:totalC,color:'#3b82f6'},{label:'성인',val:totalA,color:'#f59e0b'},{label:'영아',val:totalT,color:'#10b981'}].filter(p=>p.val>0);
+  const pieTotal = pieData.reduce((s,p)=>s+p.val,0);
+  let ang=-Math.PI/2;
+  pieData.forEach(p=>{
+    const slice=(p.val/pieTotal)*Math.PI*2;
+    pctx.beginPath();pctx.moveTo(pcx,pcy);
+    pctx.arc(pcx,pcy,pr,ang,ang+slice);pctx.closePath();
+    pctx.fillStyle=p.color;pctx.fill();
+    pctx.strokeStyle='#111827';pctx.lineWidth=1.5;pctx.stroke();
+    ang+=slice;
+  });
+  pctx.beginPath();pctx.arc(pcx,pcy,pInner,0,Math.PI*2);
+  pctx.fillStyle='#111827';pctx.fill();
+  const pFontSize = Math.max(10, Math.round(pieSize*0.055));
+  pctx.fillStyle='#60a5fa';pctx.font=`bold ${pFontSize}px JetBrains Mono`;
+  pctx.textAlign='center';pctx.fillText(totalV.toLocaleString(),pcx,pcy+4);
+  document.getElementById('day-pie-legend').innerHTML = pieData.map(p=>`
+    <div class="legend-item" style="justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:6px;flex:1">
+        <div class="legend-dot" style="background:${p.color}"></div>
+        <div class="legend-label">${p.label}</div>
+      </div>
+      <div class="legend-pct">${p.val.toLocaleString()} <span style="color:var(--text3);font-size:9px">(${(p.val/pieTotal*100).toFixed(1)}%)</span></div>
+    </div>`).join('');
+
+  // 에이전시별
+  const agMap={};
+  data.forEach(g=>{agMap[g.agency]=(agMap[g.agency]||0)+g.total;});
+  const agSorted=Object.entries(agMap).sort((a,b)=>b[1]-a[1]);
+  const maxAg=agSorted[0]?agSorted[0][1]:1;
+  document.getElementById('day-agency-bars').innerHTML = agSorted.map(([ag,v],i)=>`
+    <div class="bar-item">
+      <div class="bar-label"><span class="bar-name">${ag}</span><span class="bar-val">${v.toLocaleString()}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(v/maxAg*100).toFixed(1)}%;background:${colors[i%colors.length]}"></div></div>
+    </div>`).join('');
+
+  // 그룹 규모 분포 — 반응형
+  const sizePanelEl = document.getElementById('day-size-panel');
+  const canvas=document.getElementById('day-size-chart');
+  const ctx=canvas.getContext('2d');
+  const W=Math.max(200, sizePanelEl.clientWidth - 40);
+  const H=Math.max(130, Math.round(W*0.42));
+  canvas.width=W; canvas.height=H;
+  const bins=[{label:'~50',min:0,max:50},{label:'51~100',min:51,max:100},{label:'101~200',min:101,max:200},{label:'201~300',min:201,max:300},{label:'301~400',min:301,max:400},{label:'401+',min:401,max:Infinity}];
+  const counts=bins.map(b=>({...b,cnt:data.filter(g=>g.total>=b.min&&g.total<=b.max).length}));
+  const maxC=Math.max(...counts.map(c=>c.cnt),1);
+  const pad={l:28,r:8,t:14,b:28};
+  const cW=W-pad.l-pad.r, cH=H-pad.t-pad.b;
+  const bw=cW/bins.length*0.58;
+  ctx.clearRect(0,0,W,H);
+  for(let i=0;i<=4;i++){
+    const y=pad.t+cH-(i/4)*cH;
+    ctx.strokeStyle='rgba(255,255,255,0.05)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+cW,y);ctx.stroke();
+    if(i>0){ctx.fillStyle='#8899b0';ctx.font='8px JetBrains Mono';ctx.textAlign='right';ctx.fillText(Math.round(maxC*i/4),pad.l-3,y+3);}
+  }
+  counts.forEach((c,i)=>{
+    const x=pad.l+(i+0.5)/bins.length*cW;
+    const h=maxC>0?(c.cnt/maxC)*cH:0;
+    const y=pad.t+cH-h;
+    const grad=ctx.createLinearGradient(0,y,0,pad.t+cH);
+    grad.addColorStop(0,'#f97316');grad.addColorStop(1,'rgba(249,115,22,0.3)');
+    ctx.fillStyle=grad;ctx.fillRect(x-bw/2,y,bw,h);
+    if(c.cnt>0){ctx.fillStyle='#fff';ctx.font=`bold ${Math.max(8,Math.round(W/55))}px JetBrains Mono`;ctx.textAlign='center';ctx.fillText(c.cnt,x,y-4);}
+    ctx.fillStyle='#8899b0';ctx.font='8px Noto Sans KR';ctx.textAlign='center';
+    ctx.fillText(c.label,x,H-5);
+  });
+}
+
+// ===== DIRECT =====
+function renderDirectDetail() {
+  const sectorBadge = s => s==='Public'?'badge-green':s==='Private'?'badge-blue':'badge-purple';
+  const typeBadge = t => t==='School'?'badge-orange':'badge-teal';
+  const table = document.getElementById('direct-detail');
+  table.innerHTML = `<thead><tr><th>날짜</th><th>그룹명</th><th>유형</th><th>섹터</th><th style="text-align:right">합계</th></tr></thead>
+  <tbody>${directData.sort((a,b)=>b.dov.localeCompare(a.dov)).map(g=>`
+    <tr>
+      <td class="date">${g.dov}</td>
+      <td style="font-size:10px;max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${g.name}</td>
+      <td><span class="badge ${typeBadge(g.type)}">${g.type==='Kindergarten'?'KG':'SCH'}</span></td>
+      <td><span class="badge ${sectorBadge(g.sector)}">${g.sector}</span></td>
+      <td class="num">${g.total.toLocaleString()}</td>
+    </tr>`).join('')}</tbody>`;
+}
+
+// ===== COMPARE TAB =====
+const CMP_COLORS = ['#3b82f6','#f59e0b','#10b981','#a78bfa'];
+
+function initCompare() {
+  const agencies = [...new Set(groupListData.map(g => g.agency))].sort();
+  for(let i=0;i<4;i++) {
+    const sel = document.getElementById(`cmp-ag-${i}`);
+    agencies.forEach(a => {
+      const opt = document.createElement('option');
+      opt.value = a; opt.textContent = a;
+      sel.appendChild(opt);
+    });
+  }
+  // defaults
+  const defaults = ['Happy Smile','Kinh Bắc Travel','Anh Quân Travel','Hải Hà Travel'];
+  defaults.forEach((d,i) => {
+    const sel = document.getElementById(`cmp-ag-${i}`);
+    if([...sel.options].find(o=>o.value===d)) sel.value = d;
+  });
+}
+
+function setCmpPreset(p) {
+  const map = {
+    '2026': ['2026-01-01','2026-12-31'],
+    '2025': ['2025-01-01','2025-12-31'],
+    'q1_2026': ['2026-01-01','2026-03-31'],
+    'thisMonth': ['2026-04-01','2026-04-30'],
+    'all': ['2024-01-01','2026-12-31'],
+  };
+  const [f,t] = map[p]||['',''];
+  document.getElementById('cmp-from').value = f;
+  document.getElementById('cmp-to').value   = t;
+  renderCompare();
+}
+
+function renderCompare() {
+  const from = document.getElementById('cmp-from').value;
+  const to   = document.getElementById('cmp-to').value;
+  const selected = [0,1,2,3]
+    .map(i => document.getElementById(`cmp-ag-${i}`).value)
+    .filter(v => v !== '');
+
+  if(!selected.length) {
+    document.getElementById('cmp-empty').style.display = 'block';
+    document.getElementById('cmp-result').style.display = 'none';
+    return;
+  }
+  document.getElementById('cmp-empty').style.display = 'none';
+  document.getElementById('cmp-result').style.display = 'block';
+
+  // 데이터 수집
+  const agData = selected.map(ag => {
+    const rows = groupListData.filter(g => {
+      if(g.agency !== ag) return false;
+      if(from && g.dov < from) return false;
+      if(to   && g.dov > to)   return false;
+      return true;
+    });
+    const totalV  = rows.reduce((s,g)=>s+g.total,0);
+    const totalC  = rows.reduce((s,g)=>s+(g.child||0),0);
+    const totalA  = rows.reduce((s,g)=>s+(g.adult||0),0);
+    const totalT  = rows.reduce((s,g)=>s+(g.toddler||0),0);
+    const groups  = rows.length;
+    const avgSize = groups ? Math.round(totalV/groups) : 0;
+    const kg = rows.filter(g=>g.type==='Kindergarten').reduce((s,g)=>s+g.total,0);
+    const sc = rows.filter(g=>g.type==='School').reduce((s,g)=>s+g.total,0);
+    // monthly
+    const monthly = {};
+    rows.forEach(g => {
+      const k = g.dov.slice(0,7);
+      monthly[k] = (monthly[k]||0)+g.total;
+    });
+    return {ag, rows, totalV, totalC, totalA, totalT, groups, avgSize, kg, sc, monthly};
+  });
+
+  const colorsUsed = selected.map((_,i) => CMP_COLORS[i]);
+
+  // KPI 카드
+  document.getElementById('cmp-kpis').style.gridTemplateColumns = `repeat(${agData.length},1fr)`;
+  document.getElementById('cmp-kpis').innerHTML = agData.map((d,i) => `
+    <div class="cmp-kpi-card" style="border-top:3px solid ${colorsUsed[i]}">
+      <div class="cmp-kpi-name" style="color:${colorsUsed[i]}">${d.ag}</div>
+      <div class="cmp-kpi-val" style="color:${colorsUsed[i]}">${d.totalV.toLocaleString()}<span style="font-size:14px;font-family:Noto Sans KR">명</span></div>
+      <div class="cmp-kpi-row">
+        <div class="cmp-kpi-item">예약건수 <strong>${d.groups}건</strong></div>
+        <div class="cmp-kpi-item">평균규모 <strong>${d.avgSize}명</strong></div>
+        <div class="cmp-kpi-item">어린이 <strong>${d.totalV>0?(d.totalC/d.totalV*100).toFixed(1):0}%</strong></div>
+        <div class="cmp-kpi-item">KG <strong>${d.kg.toLocaleString()}</strong> / 학교 <strong>${d.sc.toLocaleString()}</strong></div>
+      </div>
+    </div>`).join('');
+
+  // rAF으로 캔버스 크기 확정 후 그리기
+  requestAnimationFrame(() => {
+    drawCmpBar(agData, colorsUsed);
+    drawCmpLine(agData, colorsUsed, from, to);
+    drawCmpComp(agData, colorsUsed);
+    drawCmpType(agData, colorsUsed);
+    drawCmpDetailTable(agData, colorsUsed);
+    drawCmpLogs(agData, colorsUsed);
+    // ResizeObserver 등록
+    ['cmp-bar-panel','cmp-line-panel','cmp-comp-panel','cmp-type-panel'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) _resizeObserver.observe(el);
+    });
+  });
+}
+
+function cmpCanvasSetup(canvasId, panelId, ratio=0.42) {
+  const panel = document.getElementById(panelId);
+  const canvas = document.getElementById(canvasId);
+  const W = Math.max(200, panel.clientWidth - 40);
+  const H = Math.max(160, Math.round(W * ratio));
+  canvas.width = W; canvas.height = H;
+  return {canvas, ctx: canvas.getContext('2d'), W, H};
+}
+
+function drawCmpBar(agData, cols) {
+  const {canvas, ctx, W, H} = cmpCanvasSetup('cmp-bar-chart','cmp-bar-panel', 0.55);
+  const pad = {l:50,r:20,t:20,b:40};
+  const cW = W-pad.l-pad.r, cH = H-pad.t-pad.b;
+  const maxV = Math.max(...agData.map(d=>d.totalV), 1);
+  ctx.clearRect(0,0,W,H);
+
+  // grid
+  for(let i=0;i<=4;i++) {
+    const y = pad.t+cH-(i/4)*cH;
+    ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+cW,y);ctx.stroke();
+    ctx.fillStyle='#8899b0';ctx.font='9px JetBrains Mono';ctx.textAlign='right';
+    const lbl = maxV*i/4>=1000?(maxV*i/4/1000).toFixed(1)+'k':Math.round(maxV*i/4)+'';
+    ctx.fillText(lbl, pad.l-5, y+3);
+  }
+
+  const bw = Math.min(70, cW/agData.length*0.55);
+  agData.forEach((d,i) => {
+    const x = pad.l + (i+0.5)/agData.length*cW;
+    const h = (d.totalV/maxV)*cH;
+    const y = pad.t+cH-h;
+    const grad = ctx.createLinearGradient(0,y,0,pad.t+cH);
+    grad.addColorStop(0, cols[i]);
+    grad.addColorStop(1, cols[i]+'44');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.roundRect ? ctx.roundRect(x-bw/2,y,bw,h,4) : ctx.rect(x-bw/2,y,bw,h);
+    ctx.fill();
+    // value label
+    ctx.fillStyle='#fff';ctx.font=`bold ${Math.max(9,Math.round(W/55))}px JetBrains Mono`;ctx.textAlign='center';
+    const vl = d.totalV>=1000?(d.totalV/1000).toFixed(1)+'k':d.totalV+'';
+    ctx.fillText(vl, x, y-6);
+    // name label
+    ctx.fillStyle=cols[i];ctx.font=`11px Noto Sans KR`;
+    const short = d.ag.length>10?d.ag.slice(0,10)+'…':d.ag;
+    ctx.fillText(short, x, H-8);
+  });
+}
+
+function drawCmpLine(agData, cols, from, to) {
+  const {canvas, ctx, W, H} = cmpCanvasSetup('cmp-line-chart','cmp-line-panel', 0.45);
+  const pad = {l:44,r:16,t:20,b:36};
+  const cW = W-pad.l-pad.r, cH = H-pad.t-pad.b;
+  ctx.clearRect(0,0,W,H);
+
+  // collect all months in range
+  const allMonths = new Set();
+  agData.forEach(d => Object.keys(d.monthly).forEach(m => allMonths.add(m)));
+  const months = [...allMonths].sort();
+  if(!months.length) return;
+
+  const maxV = Math.max(...agData.flatMap(d => months.map(m => d.monthly[m]||0)), 1);
+
+  // grid
+  for(let i=0;i<=4;i++) {
+    const y = pad.t+cH-(i/4)*cH;
+    ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+cW,y);ctx.stroke();
+    ctx.fillStyle='#8899b0';ctx.font='9px JetBrains Mono';ctx.textAlign='right';
+    const lbl = maxV*i/4>=1000?(maxV*i/4/1000).toFixed(1)+'k':Math.round(maxV*i/4)+'';
+    ctx.fillText(lbl, pad.l-4, y+3);
+  }
+
+  // lines
+  agData.forEach((d,i) => {
+    const pts = months.map((m,mi) => ({
+      x: pad.l + (mi/(months.length-1||1))*cW,
+      y: pad.t+cH-((d.monthly[m]||0)/maxV)*cH,
+      v: d.monthly[m]||0
+    }));
+    ctx.strokeStyle=cols[i]; ctx.lineWidth=2.5; ctx.setLineDash([]);
+    ctx.beginPath();
+    pts.forEach((p,pi) => pi===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));
+    ctx.stroke();
+    pts.forEach(p => {
+      if(!p.v) return;
+      ctx.beginPath();ctx.arc(p.x,p.y,4,0,Math.PI*2);
+      ctx.fillStyle=cols[i];ctx.fill();
+      ctx.fillStyle='#fff';ctx.font='bold 8px JetBrains Mono';ctx.textAlign='center';
+      if(p.v>=1000) ctx.fillText((p.v/1000).toFixed(1)+'k',p.x,p.y-8);
+      else if(p.v>0) ctx.fillText(p.v,p.x,p.y-8);
+    });
+  });
+
+  // x labels
+  ctx.fillStyle='#8899b0';ctx.font='8px JetBrains Mono';ctx.textAlign='center';
+  months.forEach((m,mi) => {
+    const x = pad.l+(mi/(months.length-1||1))*cW;
+    ctx.fillText(m.slice(2), x, H-6);
+  });
+
+  // legend
+  agData.forEach((d,i) => {
+    const lx = pad.l + i*(cW/agData.length);
+    ctx.strokeStyle=cols[i];ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(lx,10);ctx.lineTo(lx+12,10);ctx.stroke();
+    ctx.beginPath();ctx.arc(lx+6,10,3,0,Math.PI*2);ctx.fillStyle=cols[i];ctx.fill();
+    ctx.fillStyle='#94a3b8';ctx.font='9px Noto Sans KR';ctx.textAlign='left';
+    const short = d.ag.length>12?d.ag.slice(0,12)+'…':d.ag;
+    ctx.fillText(short, lx+16, 13);
+  });
+}
+
+function drawCmpComp(agData, cols) {
+  const {canvas, ctx, W, H} = cmpCanvasSetup('cmp-comp-chart','cmp-comp-panel', 0.5);
+  const pad = {l:44,r:16,t:20,b:40};
+  const cW = W-pad.l-pad.r, cH = H-pad.t-pad.b;
+  ctx.clearRect(0,0,W,H);
+  const cats = [{k:'totalC',label:'어린이',col:'#3b82f6'},{k:'totalA',label:'성인',col:'#f59e0b'},{k:'totalT',label:'영아',col:'#10b981'}];
+  const gw = cW/agData.length;
+  const bw = Math.min(18, gw/cats.length*0.7);
+  const maxV = Math.max(...agData.flatMap(d => cats.map(c=>d[c.k])), 1);
+
+  for(let i=0;i<=4;i++) {
+    const y = pad.t+cH-(i/4)*cH;
+    ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+cW,y);ctx.stroke();
+    ctx.fillStyle='#8899b0';ctx.font='8px JetBrains Mono';ctx.textAlign='right';
+    const lbl = maxV*i/4>=1000?(maxV*i/4/1000).toFixed(1)+'k':Math.round(maxV*i/4)+'';
+    ctx.fillText(lbl, pad.l-4, y+3);
+  }
+
+  agData.forEach((d,gi) => {
+    const cx = pad.l + (gi+0.5)*gw;
+    cats.forEach((c,ci) => {
+      const v = d[c.k];
+      const x = cx + (ci - (cats.length-1)/2)*(bw+3);
+      const h = (v/maxV)*cH;
+      const y = pad.t+cH-h;
+      ctx.fillStyle = c.col+(gi===0?'ff':'99');
+      ctx.fillRect(x-bw/2, y, bw, h);
+    });
+    ctx.fillStyle = cols[gi]; ctx.font='10px Noto Sans KR'; ctx.textAlign='center';
+    const short = d.ag.length>9?d.ag.slice(0,9)+'…':d.ag;
+    ctx.fillText(short, cx, H-6);
+  });
+
+  // legend
+  cats.forEach((c,i) => {
+    ctx.fillStyle=c.col;ctx.fillRect(pad.l+i*55, 6, 10, 6);
+    ctx.fillStyle='#94a3b8';ctx.font='9px Noto Sans KR';ctx.textAlign='left';
+    ctx.fillText(c.label, pad.l+i*55+13, 12);
+  });
+}
+
+function drawCmpType(agData, cols) {
+  const {canvas, ctx, W, H} = cmpCanvasSetup('cmp-type-chart','cmp-type-panel', 0.5);
+  const pad = {l:44,r:16,t:20,b:40};
+  const cW = W-pad.l-pad.r, cH = H-pad.t-pad.b;
+  ctx.clearRect(0,0,W,H);
+  const cats = [{k:'kg',label:'Kindergarten',col:'#14b8a6'},{k:'sc',label:'School',col:'#f97316'}];
+  const gw = cW/agData.length;
+  const bw = Math.min(22, gw/cats.length*0.7);
+  const maxV = Math.max(...agData.flatMap(d => [d.kg,d.sc]), 1);
+
+  for(let i=0;i<=4;i++) {
+    const y = pad.t+cH-(i/4)*cH;
+    ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+cW,y);ctx.stroke();
+    ctx.fillStyle='#8899b0';ctx.font='8px JetBrains Mono';ctx.textAlign='right';
+    const lbl = maxV*i/4>=1000?(maxV*i/4/1000).toFixed(1)+'k':Math.round(maxV*i/4)+'';
+    ctx.fillText(lbl, pad.l-4, y+3);
+  }
+
+  agData.forEach((d,gi) => {
+    const cx = pad.l + (gi+0.5)*gw;
+    cats.forEach((c,ci) => {
+      const v = d[c.k];
+      const x = cx + (ci - 0.5)*(bw+4);
+      const h = (v/maxV)*cH;
+      const y = pad.t+cH-h;
+      const grad = ctx.createLinearGradient(0,y,0,pad.t+cH);
+      grad.addColorStop(0, c.col); grad.addColorStop(1, c.col+'44');
+      ctx.fillStyle = grad;
+      ctx.fillRect(x-bw/2, y, bw, h);
+      if(v>0) {
+        ctx.fillStyle='#fff';ctx.font='bold 8px JetBrains Mono';ctx.textAlign='center';
+        ctx.fillText(v>=1000?(v/1000).toFixed(1)+'k':v, x, y-4);
+      }
+    });
+    ctx.fillStyle = cols[gi]; ctx.font='10px Noto Sans KR'; ctx.textAlign='center';
+    const short = d.ag.length>9?d.ag.slice(0,9)+'…':d.ag;
+    ctx.fillText(short, cx, H-6);
+  });
+
+  cats.forEach((c,i) => {
+    ctx.fillStyle=c.col;ctx.fillRect(pad.l+i*120, 6, 10, 6);
+    ctx.fillStyle='#94a3b8';ctx.font='9px Noto Sans KR';ctx.textAlign='left';
+    ctx.fillText(c.label, pad.l+i*120+13, 12);
+  });
+}
+
+function drawCmpDetailTable(agData, cols) {
+  const table = document.getElementById('cmp-detail-table');
+  const headers = ['항목',...agData.map((d,i)=>`<span style="color:${cols[i]}">${d.ag}</span>`)];
+  const rows = [
+    ['총 방문객', ...agData.map(d=>d.totalV.toLocaleString()+'명')],
+    ['예약 건수', ...agData.map(d=>d.groups+'건')],
+    ['평균 규모', ...agData.map(d=>d.avgSize+'명/그룹')],
+    ['어린이', ...agData.map(d=>d.totalC.toLocaleString()+'명 ('+( d.totalV?( d.totalC/d.totalV*100).toFixed(1):0)+'%)')],
+    ['성인', ...agData.map(d=>d.totalA.toLocaleString()+'명 ('+( d.totalV?( d.totalA/d.totalV*100).toFixed(1):0)+'%)')],
+    ['영아', ...agData.map(d=>d.totalT.toLocaleString()+'명')],
+    ['Kindergarten', ...agData.map(d=>d.kg.toLocaleString()+'명')],
+    ['School', ...agData.map(d=>d.sc.toLocaleString()+'명')],
+  ];
+  table.innerHTML = `<thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead>
+  <tbody>${rows.map(r=>`<tr>${r.map((c,i)=>`<td ${i>0?'class="num"':'style="font-weight:600;color:var(--text2)"'}>${c}</td>`).join('')}</tr>`).join('')}</tbody>`;
+}
+
+function drawCmpLogs(agData, cols) {
+  const container = document.getElementById('cmp-group-logs');
+  container.style.gridTemplateColumns = `repeat(${Math.min(agData.length,2)},1fr)`;
+  container.innerHTML = agData.map((d,i) => `
+    <div class="panel">
+      <div class="panel-title" style="color:${cols[i]}">
+        <span style="background:${cols[i]};width:3px;height:12px;display:inline-block;border-radius:2px;margin-right:8px"></span>
+        ${d.ag} — 방문 기록 (${d.rows.length}건)
+      </div>
+      <div class="scroll-table" style="max-height:220px">
+        <table class="data-table">
+          <thead><tr><th>날짜</th><th>그룹명</th><th>유형</th><th style="text-align:right">방문객</th></tr></thead>
+          <tbody>${[...d.rows].sort((a,b)=>b.dov.localeCompare(a.dov)).map(g=>`
+            <tr>
+              <td class="date">${g.dov}</td>
+              <td style="font-size:10px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${g.name}</td>
+              <td><span class="badge ${g.type==='School'?'badge-orange':'badge-teal'}" style="font-size:8px">${g.type==='School'?'SCH':'KG'}</span></td>
+              <td class="num">${g.total.toLocaleString()}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`).join('');
+}
+
+window.addEventListener('load', () => {
+  init();
+  // load 후 한 프레임 뒤에 캔버스 렌더 (레이아웃 확정 후)
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      renderDonut();
+      renderYearlyChart();
+    });
+  });
+});
+
+// 반응형: 창 크기 변경 시 캔버스 재렌더링
+let _resizeTimer;
+const _resizeObserver = new ResizeObserver(() => {
+  clearTimeout(_resizeTimer);
+  _resizeTimer = setTimeout(() => {
+    renderDonut();
+    renderYearlyChart();
+    renderMonthlyChart();
+    // analytics 패널이 열려있으면 재렌더
+    const analytics = document.getElementById('day-analytics');
+    if(analytics && analytics.style.display !== 'none') {
+      const dateFrom = document.getElementById('grp-date-from').value;
+      const dateTo   = document.getElementById('grp-date-to').value;
+      const ag = document.getElementById('grp-agency').value;
+      const tp = document.getElementById('grp-type').value;
+      const sc = document.getElementById('grp-sector').value;
+      const filtered = groupListData.filter(g => {
+        if(ag !== 'all' && g.agency !== ag) return false;
+        if(tp !== 'all' && g.type !== tp) return false;
+        if(sc !== 'all' && g.sector !== sc) return false;
+        if(dateFrom && g.dov < dateFrom) return false;
+        if(dateTo   && g.dov > dateTo)   return false;
+        return true;
+      });
+      if(filtered.length > 0) renderDayAnalytics(filtered, dateFrom, dateTo);
+    }
+  }, 150);
+});
+
+window.addEventListener('DOMContentLoaded', () => {
+  const yp = document.getElementById('yearly-panel');
+  const dp = document.getElementById('donut-panel');
+  if(yp) _resizeObserver.observe(yp);
+  if(dp) _resizeObserver.observe(dp);
+});
+
+// analytics 패널 표시될 때 pie/size 패널 observe 등록
+function observeAnalyticsPanels() {
+  const pp = document.getElementById('day-pie-panel');
+  const sp = document.getElementById('day-size-panel');
+  if(pp) _resizeObserver.observe(pp);
+  if(sp) _resizeObserver.observe(sp);
+}
+</script>
+</body>
+</html>
