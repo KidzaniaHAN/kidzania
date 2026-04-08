@@ -274,6 +274,124 @@
   .cmp-kpi-row { display:flex; gap:16px; margin-top:6px; flex-wrap:wrap; }
   .cmp-kpi-item { font-size:10px; color:var(--text2); }
   .cmp-kpi-item strong { color:var(--text); font-family:'JetBrains Mono',monospace; }
+
+  /* 탭 텍스트 반응형 */
+  .tab-text-short { display:none; }
+  .tab-text-full  { display:inline; }
+  @media (max-width: 768px) {
+    .tab-text-short { display:inline; }
+    .tab-text-full  { display:none; }
+  }
+
+  /* ═══════════════════════════════════════
+     📱 MOBILE RESPONSIVE — 768px 이하
+  ═══════════════════════════════════════ */
+  @media (max-width: 768px) {
+
+    /* 헤더 */
+    .header { padding:10px 14px; flex-wrap:wrap; gap:8px; }
+    .header-left { gap:10px; }
+    .header-title { font-size:16px; letter-spacing:1px; }
+    .header-sub { font-size:10px; }
+    .header-right { width:100%; gap:6px; flex-wrap:wrap; }
+    .data-badge { font-size:10px; padding:4px 8px; }
+    .kz-badge { font-size:14px; padding:5px 10px; }
+
+    /* 탭 */
+    .tabs { padding:0 8px; overflow-x:auto; -webkit-overflow-scrolling:touch; gap:0; flex-wrap:nowrap; }
+    .tabs::-webkit-scrollbar { height:0; }
+    .tab { padding:10px 12px; font-size:11px; white-space:nowrap; flex-shrink:0; }
+    .tab-icon { display:none; }
+
+    /* 메인 패딩 */
+    .main { padding:12px 10px; }
+
+    /* KPI 행 — 2열 */
+    .kpi-row { grid-template-columns:1fr 1fr !important; gap:8px; margin-bottom:10px; }
+    .kpi { padding:12px; }
+    .kpi-value { font-size:24px; }
+    .kpi-label { font-size:9px; }
+
+    /* stat-row — 3열 → 세로 스크롤 */
+    .stat-row { flex-wrap:wrap; }
+    .stat-cell { flex:1 1 calc(33.33% - 1px); min-width:90px; padding:9px 10px; }
+    .stat-cell-val { font-size:12px; }
+
+    /* 그리드 — 모두 1열 */
+    .grid-2,
+    .grid-3,
+    .grid-3-2 { grid-template-columns:1fr !important; gap:10px; }
+
+    /* 패널 */
+    .panel { padding:14px; }
+    .panel-title { font-size:10px; margin-bottom:10px; }
+
+    /* 바 차트 */
+    .bar-val { font-size:10px; }
+    .bar-name { font-size:10px; }
+
+    /* 테이블 */
+    .scroll-table { max-height:300px; }
+    .data-table th, .data-table td { padding:6px 7px; font-size:10px; }
+
+    /* 뱃지 */
+    .badge { font-size:8px; padding:2px 5px; }
+
+    /* 랭킹 */
+    .rank-val { font-size:16px; }
+    .rank-num { font-size:14px; }
+    .rank-name { font-size:11px; }
+
+    /* 필터 바 */
+    .filter-bar { gap:6px; }
+    .filter-select { font-size:10px; padding:4px 7px; }
+    .filter-label { font-size:9px; }
+    .btn, .btn-outline { font-size:10px; padding:4px 9px; }
+
+    /* 토글 */
+    .toggle-btn { font-size:10px; padding:4px 9px; }
+
+    /* annotation */
+    .annotation { font-size:10px; padding:7px 10px; }
+
+    /* 그룹 상세 — 분석 패널 그리드 */
+    #day-analytics > div[style*="grid-template-columns:1.1fr"] { grid-template-columns:1fr !important; }
+    #day-analytics > div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns:1fr !important; }
+    #day-kpis { grid-template-columns:1fr 1fr !important; }
+
+    /* 비교 탭 */
+    #tab-compare .panel > div[style*="flex-wrap:wrap"] { flex-direction:column; }
+    #cmp-kpis { grid-template-columns:1fr 1fr !important; }
+    #tab-compare div[style*="grid-template-columns:1fr 1.6fr"],
+    #tab-compare div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns:1fr !important; }
+    .cmp-slot select { min-width:100% !important; }
+    #cmp-group-logs { grid-template-columns:1fr !important; }
+
+    /* 직접 그룹 탭 */
+    #tab-direct .grid-2 { grid-template-columns:1fr !important; }
+
+    /* 주별 테이블 가로 스크롤 */
+    .section-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+    .weekly-col { min-width:65px; }
+
+    /* 도넛 범례 */
+    .donut-legend .legend-item { font-size:11px; }
+    .legend-pct { font-size:10px; }
+  }
+
+  /* ═══════════════════════════════════════
+     📱 SMALL MOBILE — 480px 이하
+  ═══════════════════════════════════════ */
+  @media (max-width: 480px) {
+    .header-title { font-size:14px; }
+    .kpi-row { grid-template-columns:1fr !important; }
+    .stat-cell { flex:1 1 50%; }
+    #day-kpis { grid-template-columns:1fr !important; }
+    #cmp-kpis { grid-template-columns:1fr !important; }
+    .tab { padding:9px 10px; font-size:10px; }
+    .kpi-value { font-size:28px; }
+    .data-table th, .data-table td { padding:5px 6px; font-size:9px; }
+  }
 </style>
 </head>
 <body>
@@ -293,12 +411,12 @@
 </div>
 
 <div class="tabs">
-  <div class="tab active" onclick="switchTab('overview')"><span class="tab-icon">📊</span>종합 현황</div>
-  <div class="tab" onclick="switchTab('weekly')"><span class="tab-icon">📅</span>주별·월별 분석</div>
-  <div class="tab" onclick="switchTab('agency')"><span class="tab-icon">🏆</span>에이전시 랭킹</div>
-  <div class="tab" onclick="switchTab('grouplist')"><span class="tab-icon">📋</span>그룹 상세 데이터</div>
-  <div class="tab" onclick="switchTab('compare')"><span class="tab-icon">⚖️</span>그룹 비교</div>
-  <div class="tab" onclick="switchTab('direct')"><span class="tab-icon">🎯</span>직접 그룹</div>
+  <div class="tab active" onclick="switchTab('overview')"><span class="tab-icon">📊</span><span class="tab-text-full">종합 현황</span><span class="tab-text-short">현황</span></div>
+  <div class="tab" onclick="switchTab('weekly')"><span class="tab-icon">📅</span><span class="tab-text-full">주별·월별 분석</span><span class="tab-text-short">주별</span></div>
+  <div class="tab" onclick="switchTab('agency')"><span class="tab-icon">🏆</span><span class="tab-text-full">에이전시 랭킹</span><span class="tab-text-short">랭킹</span></div>
+  <div class="tab" onclick="switchTab('grouplist')"><span class="tab-icon">📋</span><span class="tab-text-full">그룹 상세 데이터</span><span class="tab-text-short">그룹</span></div>
+  <div class="tab" onclick="switchTab('compare')"><span class="tab-icon">⚖️</span><span class="tab-text-full">그룹 비교</span><span class="tab-text-short">비교</span></div>
+  <div class="tab" onclick="switchTab('direct')"><span class="tab-icon">🎯</span><span class="tab-text-full">직접 그룹</span><span class="tab-text-short">직접</span></div>
 </div>
 
 <!-- ============================== TAB 1: 종합 현황 ============================== -->
@@ -2118,6 +2236,14 @@ function drawCmpLogs(agData, cols) {
       </div>
     </div>`).join('');
 }
+
+window.addEventListener('orientationchange', () => {
+  setTimeout(() => {
+    renderDonut();
+    renderYearlyChart();
+    renderMonthlyChart();
+  }, 300);
+});
 
 window.addEventListener('load', () => {
   init();
