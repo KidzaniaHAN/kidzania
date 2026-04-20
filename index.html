@@ -240,6 +240,33 @@
     color:var(--text2); pointer-events:none;
   }
  
+  /* Canvas Tooltip */
+  #canvas-tooltip {
+    position:fixed; z-index:9999; pointer-events:none;
+    background:rgba(15,21,40,0.96); border:1px solid rgba(99,179,237,0.25);
+    border-radius:8px; padding:8px 12px; min-width:100px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.5);
+    font-family:'Noto Sans KR',sans-serif; font-size:11px; color:var(--text2);
+    display:none; transition:opacity 0.1s;
+    backdrop-filter:blur(8px);
+  }
+  #canvas-tooltip .ct-title {
+    font-size:10px; color:var(--text3); margin-bottom:5px;
+    font-family:'JetBrains Mono',monospace; letter-spacing:0.3px;
+  }
+  #canvas-tooltip .ct-row {
+    display:flex; align-items:center; gap:7px; margin-bottom:3px;
+  }
+  #canvas-tooltip .ct-row:last-child { margin-bottom:0; }
+  #canvas-tooltip .ct-dot {
+    width:8px; height:8px; border-radius:50%; flex-shrink:0;
+  }
+  #canvas-tooltip .ct-label { color:var(--text2); flex:1; }
+  #canvas-tooltip .ct-val {
+    font-family:'JetBrains Mono',monospace; color:var(--text);
+    font-weight:600; text-align:right;
+  }
+ 
   /* Month toggle */
   .toggle-group { display:flex; background:var(--bg); border:1px solid var(--border); border-radius:6px; overflow:hidden; }
   .toggle-btn { padding:5px 12px; font-size:11px; cursor:pointer; color:var(--text3); border:none; background:transparent; transition:all 0.2s; }
@@ -395,6 +422,7 @@
 </style>
 </head>
 <body>
+<div id="canvas-tooltip"></div>
  
 <div class="header">
   <div class="header-left">
@@ -836,26 +864,112 @@
     </div>
   </div>
  
-  <div class="annotation">
-    <strong>이번 주 (APR W2)</strong> 직접 그룹: <strong>25명</strong> &nbsp;|&nbsp;
-    <strong>다음 주 (APR W3)</strong> 예정: <strong>30명</strong>
-  </div>
+  <div class="annotation" id="direct-annotation"></div>
  
-  <div class="grid-2">
+  <!-- ── 상단: 주별 현황 + 구성 차트 ── -->
+  <div class="grid-2" style="margin-bottom:14px">
     <div class="panel">
       <div class="panel-title">주별 직접 그룹 현황</div>
       <table class="data-table" id="direct-weekly-table">
         <thead>
-          <tr><th>주차</th><th>기간</th><th style="text-align:right">School</th><th style="text-align:right">Kindergarten</th><th style="text-align:right">합계</th></tr>
+          <tr><th>주차</th><th>기간</th><th style="text-align:right">School</th><th style="text-align:right">KG</th><th style="text-align:right">Academy</th><th style="text-align:right">합계</th></tr>
         </thead>
         <tbody id="direct-weekly-body"></tbody>
       </table>
     </div>
-    <div class="panel">
-      <div class="panel-title teal">직접 그룹 상세 목록</div>
-      <div class="scroll-table" style="max-height:280px">
-        <table class="data-table" id="direct-detail"></table>
+    <div class="panel" id="direct-sector-panel">
+      <div class="panel-title purple">섹터 · 유형 구성</div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">그룹 유형</div>
+          <div id="direct-type-bars"></div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">섹터</div>
+          <div id="direct-sector-bars"></div>
+        </div>
       </div>
+    </div>
+  </div>
+ 
+  <!-- ── 월별 추이 차트 ── -->
+  <div class="panel grid-full" style="margin-bottom:14px">
+    <div class="panel-title">월별 방문객 추이 (유형별)</div>
+    <canvas id="direct-monthly-chart" height="140"></canvas>
+  </div>
+ 
+  <!-- ── 날짜별 / 그룹명별 비교 분석 ── -->
+  <div class="panel grid-full" style="margin-bottom:14px">
+    <div class="panel-title gold">📊 비교 분석</div>
+ 
+    <!-- 필터 바 -->
+    <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px">
+      <span class="filter-label">보기:</span>
+      <div class="toggle-group">
+        <div class="toggle-btn active" id="dv-btn-date"  onclick="setDirectView('date')">날짜별</div>
+        <div class="toggle-btn"        id="dv-btn-group" onclick="setDirectView('group')">그룹명별</div>
+        <div class="toggle-btn"        id="dv-btn-chart" onclick="setDirectView('chart')">추이 차트</div>
+      </div>
+      <span class="filter-label" style="margin-left:8px">유형:</span>
+      <select class="filter-select" id="dv-type" onchange="renderDirectCompare()">
+        <option value="all">전체</option>
+        <option value="School">School</option>
+        <option value="Kindergarten">Kindergarten</option>
+        <option value="Academy">Academy</option>
+      </select>
+      <span class="filter-label">섹터:</span>
+      <select class="filter-select" id="dv-sector" onchange="renderDirectCompare()">
+        <option value="all">전체</option>
+        <option value="Private">Private</option>
+        <option value="Public">Public</option>
+        <option value="International">International</option>
+        <option value="Other (Corporate, academy etc)">Other</option>
+      </select>
+      <span class="filter-label">기간:</span>
+      <input type="date" class="filter-select" id="dv-from" onchange="renderDirectCompare()" style="padding:4px 8px;color-scheme:dark">
+      <span style="color:var(--text3)">~</span>
+      <input type="date" class="filter-select" id="dv-to"   onchange="renderDirectCompare()" style="padding:4px 8px;color-scheme:dark">
+      <button class="btn-outline" onclick="clearDirectFilter()" style="padding:3px 9px;font-size:10px">초기화</button>
+      <span id="dv-count" style="font-size:11px;color:var(--text3);margin-left:auto"></span>
+    </div>
+ 
+    <!-- 날짜별 뷰 -->
+    <div id="dv-date-view">
+      <div class="scroll-table" style="max-height:320px">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>날짜</th>
+              <th>그룹명</th>
+              <th>유형</th>
+              <th>섹터</th>
+              <th style="text-align:right">어린이</th>
+              <th style="text-align:right">성인</th>
+              <th style="text-align:right">영아</th>
+              <th style="text-align:right">합계</th>
+            </tr>
+          </thead>
+          <tbody id="dv-date-body"></tbody>
+        </table>
+      </div>
+    </div>
+ 
+    <!-- 그룹명별 비교 뷰 -->
+    <div id="dv-group-view" style="display:none">
+      <div id="dv-group-bars" style="max-height:320px;overflow-y:auto;padding-right:4px;scrollbar-width:thin;scrollbar-color:var(--accent) transparent"></div>
+    </div>
+ 
+    <!-- 추이 차트 뷰 -->
+    <div id="dv-chart-view" style="display:none">
+      <canvas id="dv-timeline-chart" height="200"></canvas>
+    </div>
+  </div>
+ 
+  <!-- ── 상세 목록 ── -->
+  <div class="panel grid-full">
+    <div class="panel-title teal">직접 그룹 전체 목록</div>
+    <div class="scroll-table" style="max-height:300px">
+      <table class="data-table" id="direct-detail"></table>
     </div>
   </div>
 </div>
@@ -1229,6 +1343,72 @@ const directData = [
  
 const colors = ['#3b82f6','#f59e0b','#10b981','#a78bfa','#ef4444','#f97316','#14b8a6','#ec4899','#6366f1','#84cc16','#06b6d4','#d97706'];
  
+// ===== CANVAS TOOLTIP ENGINE =====
+const _ct = document.getElementById('canvas-tooltip');
+const _ctData = new Map(); // canvasId → [{x1,x2,y1,y2, title, rows:[{color,label,val}]}]
+ 
+function ctRegister(canvasId, hitAreas) {
+  _ctData.set(canvasId, hitAreas);
+}
+ 
+function ctShow(x, y, title, rows) {
+  let html = '';
+  if(title) html += `<div class="ct-title">${title}</div>`;
+  rows.forEach(r => {
+    html += `<div class="ct-row">
+      ${r.color ? `<div class="ct-dot" style="background:${r.color}"></div>` : ''}
+      <span class="ct-label">${r.label}</span>
+      <span class="ct-val">${r.val}</span>
+    </div>`;
+  });
+  _ct.innerHTML = html;
+  _ct.style.display = 'block';
+  // Position: prefer above cursor, shift left if near right edge
+  const margin = 12;
+  const tw = _ct.offsetWidth, th = _ct.offsetHeight;
+  let lx = x + margin, ly = y - th - margin;
+  if (lx + tw > window.innerWidth - 8) lx = x - tw - margin;
+  if (ly < 8) ly = y + margin;
+  _ct.style.left = lx + 'px';
+  _ct.style.top  = ly + 'px';
+}
+ 
+function ctHide() {
+  _ct.style.display = 'none';
+}
+ 
+function ctAttach(canvasId) {
+  const canvas = document.getElementById(canvasId);
+  if(!canvas) return;
+  canvas.addEventListener('mousemove', e => {
+    const areas = _ctData.get(canvasId);
+    if(!areas || !areas.length) { ctHide(); return; }
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    // Scale for HiDPI
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const cx = mx * scaleX, cy = my * scaleY;
+    const hit = areas.find(a => cx>=a.x1 && cx<=a.x2 && cy>=a.y1 && cy<=a.y2);
+    if(hit) {
+      ctShow(e.clientX, e.clientY, hit.title, hit.rows);
+      canvas.style.cursor = 'crosshair';
+    } else {
+      ctHide();
+      canvas.style.cursor = '';
+    }
+  });
+  canvas.addEventListener('mouseleave', ctHide);
+}
+ 
+// Attach to all canvases on page load
+function ctInit() {
+  ['yearly-chart','monthly-chart','direct-monthly-chart','dv-timeline-chart',
+   'cmp-bar-chart','cmp-line-chart','cmp-comp-chart','cmp-type-chart',
+   'day-size-chart'].forEach(id => ctAttach(id));
+}
+ 
 // ===== INIT =====
 function init() {
   renderAgencyBars();
@@ -1245,6 +1425,7 @@ function init() {
   renderGroupList();
   renderDirectDetail();
   updateThisNextWeek();
+  ctInit();
 }
  
 function switchTab(name) {
@@ -1426,6 +1607,20 @@ function renderYearlyChart() {
     ctx.fillStyle='#94a3b8'; ctx.font='9px Noto Sans KR'; ctx.textAlign='left';
     ctx.fillText(l.label, lx+19, 13);
   });
+ 
+  // ── 툴팁 hit areas ──
+  const hitRadius = Math.max(18, cW/12);
+  const hitAreas = [];
+  months.forEach((m,i) => {
+    const x = pad.l+(i/11)*cW;
+    const rows = [
+      {color:'#94a3b8', label:'2024', val:(monthly2024[i]||0).toLocaleString()+'명'},
+      {color:'#60a5fa', label:'2025', val:(monthly2025[i]||0).toLocaleString()+'명'},
+      {color:'#f59e0b', label:'2026', val:(monthly2026[i]||0).toLocaleString()+'명'},
+    ].filter(r=>r.val!=='0명');
+    hitAreas.push({x1:x-hitRadius, x2:x+hitRadius, y1:pad.t, y2:pad.t+cH, title:m, rows});
+  });
+  ctRegister('yearly-chart', hitAreas);
 }
  
 function renderTypeBars() {
@@ -1604,6 +1799,21 @@ function renderMonthlyChart() {
     ctx.fillStyle='#475569'; ctx.font='8px Noto Sans KR'; ctx.textAlign='center';
     ctx.fillText(m.slice(5), x, 160-5);
   });
+ 
+  // ── 툴팁 hit areas ──
+  const hitAreas = months.map((m,i) => {
+    const x = pad.l + (i+0.5)/months.length*cW;
+    const groupCnt = filtered.filter(g=>`${g.year}-${String(g.month).padStart(2,'0')}`===m).length;
+    return {
+      x1:x-Math.max(bw,8), x2:x+Math.max(bw,8), y1:pad.t, y2:pad.t+cH,
+      title: m,
+      rows:[
+        {color:'#3b82f6', label:'방문객', val: vals[i].toLocaleString()+'명'},
+        {color:'', label:'그룹 수',  val: groupCnt+'건'},
+      ]
+    };
+  });
+  ctRegister('monthly-chart', hitAreas);
 }
  
 // ===== RANKING =====
@@ -1883,6 +2093,20 @@ function renderDayAnalytics(data, dateFrom, dateTo) {
     ctx.fillStyle='#8899b0';ctx.font='8px Noto Sans KR';ctx.textAlign='center';
     ctx.fillText(c.label,x,H-5);
   });
+ 
+  // ── 툴팁 hit areas ──
+  const hitAreas = counts.map((c,i)=>{
+    const x=pad.l+(i+0.5)/bins.length*cW;
+    const groupNames = data.filter(g=>g.total>=c.min&&g.total<=c.max)
+      .sort((a,b)=>b.total-a.total).slice(0,3).map(g=>g.name||'').filter(Boolean);
+    const rows = [
+      {color:'#f97316', label:'그룹 수',   val:c.cnt+'건'},
+      {color:'',        label:'규모 범위', val:c.label+'명'},
+    ];
+    if(groupNames.length) rows.push({color:'', label:'주요 그룹', val:groupNames[0].length>14?groupNames[0].slice(0,14)+'…':groupNames[0]});
+    return {x1:x-cW/bins.length/2, x2:x+cW/bins.length/2, y1:pad.t, y2:pad.t+cH, title:'그룹 규모 분포', rows};
+  });
+  ctRegister('day-size-chart', hitAreas);
 }
  
 // ===== DIRECT =====
@@ -1898,73 +2122,358 @@ const directWeeks = [
   {name:'APR W5', label:'27 Apr~03 May', start:'2026-04-27', end:'2026-05-03'},
   {name:'MAY W1', label:'04~10 May', start:'2026-05-04', end:'2026-05-10'},
   {name:'MAY W2', label:'11~17 May', start:'2026-05-11', end:'2026-05-17'},
+  {name:'MAY W3', label:'18~24 May', start:'2026-05-18', end:'2026-05-24'},
+  {name:'MAY W4', label:'25~31 May', start:'2026-05-25', end:'2026-05-31'},
 ];
-// THIS_WEEK_IDX = APR W2 (index 5), NEXT_WEEK_IDX = APR W3 (index 6)
 const DIRECT_THIS_WEEK = 6;
 const DIRECT_NEXT_WEEK = 7;
  
-function renderDirectDetail() {
-  const sectorBadge = s => s==='Public'?'badge-green':s==='Private'?'badge-blue':'badge-purple';
-  const typeBadge = t => t==='School'?'badge-orange':'badge-teal';
+let directView = 'date';
+function setDirectView(v) {
+  directView = v;
+  ['date','group','chart'].forEach(x => {
+    document.getElementById(`dv-btn-${x}`).classList.toggle('active', x===v);
+    document.getElementById(`dv-${x}-view`).style.display = x===v ? 'block' : 'none';
+  });
+  renderDirectCompare();
+}
  
-  // ---- 주별 직접 그룹 테이블 (동적 계산) ----
+function clearDirectFilter() {
+  document.getElementById('dv-from').value = '';
+  document.getElementById('dv-to').value = '';
+  document.getElementById('dv-type').value = 'all';
+  document.getElementById('dv-sector').value = 'all';
+  renderDirectCompare();
+}
+ 
+function getFilteredDirect() {
+  const tp  = document.getElementById('dv-type')?.value   || 'all';
+  const sc  = document.getElementById('dv-sector')?.value || 'all';
+  const fr  = document.getElementById('dv-from')?.value   || '';
+  const to  = document.getElementById('dv-to')?.value     || '';
+  return directData.filter(g => {
+    if (tp !== 'all' && g.type !== tp) return false;
+    if (sc !== 'all' && g.sector !== sc) return false;
+    if (fr && g.dov < fr) return false;
+    if (to && g.dov > to) return false;
+    return true;
+  });
+}
+ 
+function renderDirectCompare() {
+  const filtered = getFilteredDirect();
+  const sectorBadge = s => s==='Public'?'badge-green':s==='Private'?'badge-blue':s==='International'?'badge-purple':'badge-gray';
+  const typeBadge   = t => t==='School'?'badge-orange':t==='Academy'?'badge-pink':'badge-teal';
+  const typeColor   = t => t==='School'?'#f97316':t==='Academy'?'#ec4899':'#14b8a6';
+ 
+  const total = filtered.reduce((s,g)=>s+g.total,0);
+  const cnt   = document.getElementById('dv-count');
+  if(cnt) cnt.textContent = `${filtered.length}건 · ${total.toLocaleString()}명`;
+ 
+  // ── 날짜별 테이블 ──
+  if (directView === 'date') {
+    const sorted = [...filtered].sort((a,b)=>a.dov.localeCompare(b.dov));
+    // group by date
+    const byDate = {};
+    sorted.forEach(g => { if(!byDate[g.dov]) byDate[g.dov]=[]; byDate[g.dov].push(g); });
+    let html = '';
+    Object.keys(byDate).sort().forEach(dov => {
+      const rows = byDate[dov];
+      const dayTotal = rows.reduce((s,g)=>s+g.total,0);
+      rows.forEach((g,i) => {
+        html += `<tr>
+          <td class="date" ${i===0?`rowspan="${rows.length}" style="vertical-align:top;border-right:1px solid rgba(255,255,255,0.06)"`:''}>
+            ${i===0?`<div style="font-weight:600">${dov}</div><div style="font-size:9px;color:var(--text3);margin-top:2px">${rows.length}그룹 · ${dayTotal.toLocaleString()}명</div>`:''}
+          </td>
+          <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px">${g.name}</td>
+          <td><span class="badge ${typeBadge(g.type)}">${g.type==='Kindergarten'?'KG':g.type==='Academy'?'ACD':'SCH'}</span></td>
+          <td><span class="badge ${sectorBadge(g.sector)}" style="font-size:9px">${g.sector==='Other (Corporate, academy etc)'?'Other':g.sector}</span></td>
+          <td class="num">${g.child||'-'}</td>
+          <td class="num">${g.adult||'-'}</td>
+          <td class="num">${g.toddler||'-'}</td>
+          <td class="num" style="font-weight:700;color:var(--text)">${g.total.toLocaleString()}</td>
+        </tr>`;
+      });
+    });
+    document.getElementById('dv-date-body').innerHTML = html || '<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:20px">해당 조건의 데이터 없음</td></tr>';
+  }
+ 
+  // ── 그룹명별 바 차트 ──
+  if (directView === 'group') {
+    const sorted = [...filtered].sort((a,b)=>b.total-a.total);
+    const maxV = sorted[0]?.total || 1;
+    const container = document.getElementById('dv-group-bars');
+    if (!sorted.length) { container.innerHTML = '<div style="text-align:center;color:var(--text3);padding:20px">해당 조건의 데이터 없음</div>'; return; }
+    container.innerHTML = sorted.map((g,i) => {
+      const pct = (g.total/maxV*100).toFixed(1);
+      const col = typeColor(g.type);
+      return `<div class="bar-item" style="margin-bottom:10px">
+        <div class="bar-label">
+          <div style="display:flex;align-items:center;gap:6px;flex:1;min-width:0">
+            <span class="badge ${typeBadge(g.type)}" style="flex-shrink:0;font-size:8px">${g.type==='Kindergarten'?'KG':g.type==='Academy'?'ACD':'SCH'}</span>
+            <span class="bar-name" style="font-size:11px">${g.name}</span>
+            <span style="font-size:9px;color:var(--text3);flex-shrink:0">${g.dov}</span>
+          </div>
+          <span class="bar-val">${g.total.toLocaleString()}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div class="bar-track" style="flex:1"><div class="bar-fill" style="width:${pct}%;background:${col}"></div></div>
+          <span style="font-size:9px;color:var(--text3);width:36px;text-align:right">${g.sector==='Other (Corporate, academy etc)'?'Other':g.sector}</span>
+        </div>
+      </div>`;
+    }).join('');
+  }
+ 
+  // ── 날짜별 추이 캔버스 차트 ──
+  if (directView === 'chart') {
+    const canvas = document.getElementById('dv-timeline-chart');
+    const ctx = canvas.getContext('2d');
+    const W = Math.max(300, canvas.offsetWidth || 700);
+    const H = 200;
+    canvas.width = W; canvas.height = H;
+    ctx.clearRect(0,0,W,H);
+ 
+    if (!filtered.length) return;
+ 
+    // 날짜별 집계 (유형별로 분리)
+    const dateMap = {};
+    filtered.forEach(g => {
+      if (!dateMap[g.dov]) dateMap[g.dov] = {School:0, Kindergarten:0, Academy:0, total:0};
+      dateMap[g.dov][g.type] = (dateMap[g.dov][g.type]||0) + g.total;
+      dateMap[g.dov].total += g.total;
+    });
+    const dates = Object.keys(dateMap).sort();
+    const maxV = Math.max(...dates.map(d=>dateMap[d].total), 1);
+ 
+    const pad = {l:44,r:16,t:20,b:36};
+    const cW = W-pad.l-pad.r, cH = H-pad.t-pad.b;
+ 
+    // Grid
+    for (let i=0;i<=4;i++) {
+      const y = pad.t+cH-(i/4)*cH;
+      ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+cW,y); ctx.stroke();
+      ctx.fillStyle='#8899b0'; ctx.font='9px JetBrains Mono'; ctx.textAlign='right';
+      const lbl = maxV*i/4>=1000?(maxV*i/4/1000).toFixed(1)+'k':Math.round(maxV*i/4)+'';
+      ctx.fillText(lbl, pad.l-4, y+3);
+    }
+ 
+    // Stacked bars
+    const bw = Math.max(6, Math.min(28, cW/dates.length*0.55));
+    const typeOrder = ['Academy','School','Kindergarten'];
+    const tColors   = {'Kindergarten':'#14b8a6','School':'#f97316','Academy':'#ec4899'};
+ 
+    dates.forEach((d,i) => {
+      const x = pad.l + (i+0.5)/dates.length*cW;
+      let yBase = pad.t + cH;
+      typeOrder.forEach(t => {
+        const v = dateMap[d][t] || 0;
+        if (!v) return;
+        const h = (v/maxV)*cH;
+        yBase -= h;
+        ctx.fillStyle = tColors[t];
+        ctx.fillRect(x-bw/2, yBase, bw, h);
+      });
+      // total label
+      const tot = dateMap[d].total;
+      if (tot > 0) {
+        const topY = pad.t+cH-(tot/maxV)*cH;
+        ctx.fillStyle='#fff'; ctx.font=`bold 8px JetBrains Mono`; ctx.textAlign='center';
+        ctx.fillText(tot>=1000?(tot/1000).toFixed(1)+'k':tot, x, topY-4);
+      }
+      // x label
+      ctx.fillStyle='#8899b0'; ctx.font='8px JetBrains Mono'; ctx.textAlign='center';
+      const lbl = dates.length > 16 ? d.slice(5) : d.slice(5);
+      ctx.fillText(lbl, x, H-4);
+    });
+ 
+    // Legend
+    Object.entries(tColors).forEach(([t,col],i) => {
+      const lx = pad.l + i*90;
+      ctx.fillStyle=col; ctx.fillRect(lx, 8, 10, 6);
+      ctx.fillStyle='#94a3b8'; ctx.font='9px Noto Sans KR'; ctx.textAlign='left';
+      ctx.fillText(t==='Kindergarten'?'KG':t, lx+13, 13);
+    });
+ 
+    // ── 툴팁 hit areas ──
+    const hitAreas = dates.map((d,i) => {
+      const x = pad.l + (i+0.5)/dates.length*cW;
+      const dm = dateMap[d];
+      // group names on this date
+      const names = filtered.filter(g=>g.dov===d).map(g=>g.name).join(', ');
+      const rows = [
+        {color:tColors['Kindergarten'], label:'KG',     val:(dm.Kindergarten||0).toLocaleString()+'명'},
+        {color:tColors['School'],       label:'School',  val:(dm.School||0).toLocaleString()+'명'},
+        {color:tColors['Academy'],      label:'Academy', val:(dm.Academy||0).toLocaleString()+'명'},
+        {color:'',                      label:'합계',     val:dm.total.toLocaleString()+'명'},
+      ].filter(r=>r.label==='합계'||r.val!=='0명');
+      return {x1:x-Math.max(bw,8), x2:x+Math.max(bw,8), y1:pad.t, y2:pad.t+cH, title:d, rows};
+    });
+    ctRegister('dv-timeline-chart', hitAreas);
+  }
+}
+ 
+function renderDirectDetail() {
+  const sectorBadge = s => s==='Public'?'badge-green':s==='Private'?'badge-blue':s==='International'?'badge-purple':'badge-gray';
+  const typeBadge   = t => t==='School'?'badge-orange':t==='Academy'?'badge-pink':'badge-teal';
+  const typeColor   = t => t==='School'?'#f97316':t==='Academy'?'#ec4899':'#14b8a6';
+ 
+  // ── 주별 테이블 ──
   const weeklyBody = document.getElementById('direct-weekly-body');
   if (weeklyBody) {
-    const rows = directWeeks.map((w, i) => {
+    const rows = directWeeks.map((w,i) => {
       const inRange = g => g.dov >= w.start && g.dov <= w.end;
-      const school = directData.filter(g => inRange(g) && g.type === 'School').reduce((s,g)=>s+g.total,0);
-      const kg     = directData.filter(g => inRange(g) && g.type === 'Kindergarten').reduce((s,g)=>s+g.total,0);
-      const total  = school + kg;
-      if (total === 0 && i > DIRECT_NEXT_WEEK) return ''; // 데이터 없는 미래 주차 생략
-      const isThis = i === DIRECT_THIS_WEEK;
-      const isNext = i === DIRECT_NEXT_WEEK;
-      const rowStyle = isThis ? 'background:rgba(59,130,246,0.07)' : isNext ? 'background:rgba(245,158,11,0.06)' : '';
-      const nameCell = isThis
-        ? `<td><strong style="color:var(--accent2)">${w.name} ★</strong></td>`
-        : isNext
-        ? `<td style="color:var(--gold)">${w.name} ▶</td>`
-        : `<td>${w.name}</td>`;
-      const totalStyle = isThis ? 'color:var(--accent2);font-weight:700' : isNext ? 'color:var(--gold)' : 'font-weight:700';
+      const school  = directData.filter(g=>inRange(g)&&g.type==='School').reduce((s,g)=>s+g.total,0);
+      const kg      = directData.filter(g=>inRange(g)&&g.type==='Kindergarten').reduce((s,g)=>s+g.total,0);
+      const acd     = directData.filter(g=>inRange(g)&&g.type==='Academy').reduce((s,g)=>s+g.total,0);
+      const total   = school+kg+acd;
+      if (total===0 && i>DIRECT_NEXT_WEEK) return '';
+      const isThis = i===DIRECT_THIS_WEEK, isNext = i===DIRECT_NEXT_WEEK;
+      const rowStyle = isThis?'background:rgba(59,130,246,0.07)':isNext?'background:rgba(245,158,11,0.06)':'';
+      const nameCell = isThis?`<td><strong style="color:var(--accent2)">${w.name} ★</strong></td>`:
+                       isNext?`<td style="color:var(--gold)">${w.name} ▶</td>`:`<td>${w.name}</td>`;
+      const totStyle = isThis?'color:var(--accent2);font-weight:700':isNext?'color:var(--gold)':'font-weight:700';
       return `<tr style="${rowStyle}">${nameCell}<td class="date">${w.label}</td>
-        <td class="num">${school > 0 ? school.toLocaleString() : '0'}</td>
-        <td class="num">${kg > 0 ? kg.toLocaleString() : '0'}</td>
-        <td class="num" style="${totalStyle}">${total > 0 ? total.toLocaleString() : '0'}</td></tr>`;
+        <td class="num">${school||'0'}</td><td class="num">${kg||'0'}</td>
+        <td class="num">${acd||'-'}</td>
+        <td class="num" style="${totStyle}">${total.toLocaleString()}</td></tr>`;
     }).join('');
     weeklyBody.innerHTML = rows;
   }
  
-  // ---- KPI 카드 동적 업데이트 ----
-  const totalDirect = directData.reduce((s,g)=>s+g.total,0);
+  // ── KPI ──
+  const totalDirect  = directData.reduce((s,g)=>s+g.total,0);
   const schoolDirect = directData.filter(g=>g.type==='School').reduce((s,g)=>s+g.total,0);
-  const kgDirect = directData.filter(g=>g.type==='Kindergarten').reduce((s,g)=>s+g.total,0);
-  const countDirect = directData.length;
- 
-  // ---- KPI 카드 DOM 업데이트 ----
+  const kgDirect     = directData.filter(g=>g.type==='Kindergarten').reduce((s,g)=>s+g.total,0);
   const el = id => document.getElementById(id);
   if(el('direct-kpi-total'))  el('direct-kpi-total').textContent  = totalDirect.toLocaleString();
-  if(el('direct-kpi-count'))  el('direct-kpi-count').textContent  = countDirect;
+  if(el('direct-kpi-count'))  el('direct-kpi-count').textContent  = directData.length;
   if(el('direct-kpi-school')) el('direct-kpi-school').textContent = schoolDirect.toLocaleString();
   if(el('direct-kpi-kg'))     el('direct-kpi-kg').textContent     = kgDirect.toLocaleString();
  
-  // annotation 업데이트
-  const thisWeekDirect = directData.filter(g=>g.dov>=directWeeks[DIRECT_THIS_WEEK].start&&g.dov<=directWeeks[DIRECT_THIS_WEEK].end).reduce((s,g)=>s+g.total,0);
-  const nextWeekDirect = directData.filter(g=>g.dov>=directWeeks[DIRECT_NEXT_WEEK].start&&g.dov<=directWeeks[DIRECT_NEXT_WEEK].end).reduce((s,g)=>s+g.total,0);
-  const ann = document.querySelector('#tab-direct .annotation');
-  if (ann) {
-    ann.innerHTML = `<strong>이번 주 (${directWeeks[DIRECT_THIS_WEEK].name})</strong> 직접 그룹: <strong>${thisWeekDirect.toLocaleString()}명</strong> &nbsp;|&nbsp; <strong>다음 주 (${directWeeks[DIRECT_NEXT_WEEK].name})</strong> 예정: <strong>${nextWeekDirect.toLocaleString()}명</strong>`;
-  }
+  // ── Annotation ──
+  const tw = directData.filter(g=>g.dov>=directWeeks[DIRECT_THIS_WEEK].start&&g.dov<=directWeeks[DIRECT_THIS_WEEK].end).reduce((s,g)=>s+g.total,0);
+  const nw = directData.filter(g=>g.dov>=directWeeks[DIRECT_NEXT_WEEK].start&&g.dov<=directWeeks[DIRECT_NEXT_WEEK].end).reduce((s,g)=>s+g.total,0);
+  const ann = document.getElementById('direct-annotation');
+  if(ann) ann.innerHTML = `<strong>이번 주 (${directWeeks[DIRECT_THIS_WEEK].name})</strong> 직접 그룹: <strong>${tw.toLocaleString()}명</strong> &nbsp;|&nbsp; <strong>다음 주 (${directWeeks[DIRECT_NEXT_WEEK].name})</strong> 예정: <strong>${nw.toLocaleString()}명</strong>`;
  
-  // ---- 그룹 상세 목록 ----
+  // ── 섹터/유형 바 ──
+  const byType   = {}, bySector = {};
+  directData.forEach(g => {
+    byType[g.type]     = (byType[g.type]||0)+g.total;
+    const sc = g.sector==='Other (Corporate, academy etc)'?'Other':g.sector;
+    bySector[sc] = (bySector[sc]||0)+g.total;
+  });
+  const maxT = Math.max(...Object.values(byType),1);
+  const maxS = Math.max(...Object.values(bySector),1);
+  const tColors2 = {'Kindergarten':'#14b8a6','School':'#f97316','Academy':'#ec4899'};
+  const sColors  = {'Private':'#3b82f6','Public':'#10b981','International':'#a78bfa','Other':'#f59e0b'};
+  const tb = document.getElementById('direct-type-bars');
+  const sb = document.getElementById('direct-sector-bars');
+  if(tb) tb.innerHTML = Object.entries(byType).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`
+    <div class="bar-item" style="margin-bottom:5px">
+      <div class="bar-label"><span class="bar-name">${k}</span><span class="bar-val">${v.toLocaleString()}</span></div>
+      <div class="bar-track" style="height:6px"><div class="bar-fill" style="width:${(v/maxT*100).toFixed(1)}%;background:${tColors2[k]||'#60a5fa'}"></div></div>
+    </div>`).join('');
+  if(sb) sb.innerHTML = Object.entries(bySector).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`
+    <div class="bar-item" style="margin-bottom:5px">
+      <div class="bar-label"><span class="bar-name">${k}</span><span class="bar-val">${v.toLocaleString()}</span></div>
+      <div class="bar-track" style="height:6px"><div class="bar-fill" style="width:${(v/maxS*100).toFixed(1)}%;background:${sColors[k]||'#60a5fa'}"></div></div>
+    </div>`).join('');
+ 
+  // ── 월별 차트 ──
+  renderDirectMonthlyChart();
+ 
+  // ── 비교 분석 초기화 ──
+  renderDirectCompare();
+ 
+  // ── 전체 목록 ──
   const table = document.getElementById('direct-detail');
-  table.innerHTML = `<thead><tr><th>날짜</th><th>그룹명</th><th>유형</th><th>섹터</th><th style="text-align:right">합계</th></tr></thead>
-  <tbody>${[...directData].sort((a,b)=>b.dov.localeCompare(a.dov)).map(g=>`
+  table.innerHTML = `<thead><tr><th>날짜</th><th>그룹명</th><th>유형</th><th>섹터</th><th style="text-align:right">어린이</th><th style="text-align:right">성인</th><th style="text-align:right">영아</th><th style="text-align:right">합계</th></tr></thead>
+  <tbody>${[...directData].sort((a,b)=>a.dov.localeCompare(b.dov)).map(g=>`
     <tr>
       <td class="date">${g.dov}</td>
-      <td style="font-size:10px;max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${g.name}</td>
-      <td><span class="badge ${typeBadge(g.type)}">${g.type==='Kindergarten'?'KG':'SCH'}</span></td>
-      <td><span class="badge ${sectorBadge(g.sector)}">${g.sector}</span></td>
-      <td class="num">${g.total.toLocaleString()}</td>
+      <td style="font-size:10px;max-width:170px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${g.name}</td>
+      <td><span class="badge ${typeBadge(g.type)}" style="font-size:8px">${g.type==='Kindergarten'?'KG':g.type==='Academy'?'ACD':'SCH'}</span></td>
+      <td><span class="badge ${sectorBadge(g.sector)}" style="font-size:8px">${g.sector==='Other (Corporate, academy etc)'?'Other':g.sector}</span></td>
+      <td class="num">${g.child||'-'}</td>
+      <td class="num">${g.adult||'-'}</td>
+      <td class="num">${g.toddler||'-'}</td>
+      <td class="num" style="font-weight:700">${g.total.toLocaleString()}</td>
     </tr>`).join('')}</tbody>`;
+}
+ 
+function renderDirectMonthlyChart() {
+  const canvas = document.getElementById('direct-monthly-chart');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = Math.max(300, canvas.offsetWidth || 700);
+  const H = 140;
+  canvas.width = W; canvas.height = H;
+  ctx.clearRect(0,0,W,H);
+ 
+  const byMonth = {};
+  directData.forEach(g => {
+    const mo = g.dov.slice(0,7);
+    if(!byMonth[mo]) byMonth[mo]={School:0,Kindergarten:0,Academy:0};
+    byMonth[mo][g.type] = (byMonth[mo][g.type]||0)+g.total;
+  });
+  const months = Object.keys(byMonth).sort();
+  const maxV = Math.max(...months.map(m=>Object.values(byMonth[m]).reduce((s,v)=>s+v,0)),1);
+  const pad = {l:44,r:16,t:16,b:28};
+  const cW=W-pad.l-pad.r, cH=H-pad.t-pad.b;
+  const bw = Math.max(10, Math.min(40, cW/months.length*0.55));
+  const tColors = {'Kindergarten':'#14b8a6','School':'#f97316','Academy':'#ec4899'};
+ 
+  for(let i=0;i<=4;i++){
+    const y=pad.t+cH-(i/4)*cH;
+    ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+cW,y); ctx.stroke();
+    ctx.fillStyle='#8899b0'; ctx.font='9px JetBrains Mono'; ctx.textAlign='right';
+    const lbl=maxV*i/4>=1000?(maxV*i/4/1000).toFixed(1)+'k':Math.round(maxV*i/4)+'';
+    ctx.fillText(lbl,pad.l-4,y+3);
+  }
+ 
+  months.forEach((mo,i) => {
+    const x=pad.l+(i+0.5)/months.length*cW;
+    let yBase=pad.t+cH;
+    ['Academy','School','Kindergarten'].forEach(t=>{
+      const v=byMonth[mo][t]||0; if(!v) return;
+      const h=(v/maxV)*cH; yBase-=h;
+      ctx.fillStyle=tColors[t]; ctx.fillRect(x-bw/2,yBase,bw,h);
+    });
+    const tot=Object.values(byMonth[mo]).reduce((s,v)=>s+v,0);
+    ctx.fillStyle='#fff'; ctx.font='bold 9px JetBrains Mono'; ctx.textAlign='center';
+    ctx.fillText(tot>=1000?(tot/1000).toFixed(1)+'k':tot, x, pad.t+cH-(tot/maxV)*cH-5);
+    ctx.fillStyle='#8899b0'; ctx.font='9px JetBrains Mono';
+    ctx.fillText(mo.slice(5),x,H-4);
+  });
+ 
+  // Legend
+  Object.entries(tColors).forEach(([t,col],i)=>{
+    const lx=pad.l+i*90;
+    ctx.fillStyle=col; ctx.fillRect(lx,4,10,6);
+    ctx.fillStyle='#94a3b8'; ctx.font='9px Noto Sans KR'; ctx.textAlign='left';
+    ctx.fillText(t==='Kindergarten'?'KG':t,lx+13,9);
+  });
+ 
+  // ── 툴팁 hit areas ──
+  const hitAreas = months.map((mo,i) => {
+    const x = pad.l+(i+0.5)/months.length*cW;
+    const d = byMonth[mo];
+    const tot = Object.values(d).reduce((s,v)=>s+v,0);
+    return {
+      x1:x-Math.max(bw,10), x2:x+Math.max(bw,10), y1:pad.t, y2:pad.t+cH,
+      title: mo,
+      rows:[
+        {color:tColors['Kindergarten'], label:'Kindergarten', val:(d.Kindergarten||0).toLocaleString()+'명'},
+        {color:tColors['School'],       label:'School',       val:(d.School||0).toLocaleString()+'명'},
+        {color:tColors['Academy'],      label:'Academy',      val:(d.Academy||0).toLocaleString()+'명'},
+        {color:'',                      label:'합계',          val:tot.toLocaleString()+'명'},
+      ].filter(r=>r.label==='합계'||r.val!=='0명')
+    };
+  });
+  ctRegister('direct-monthly-chart', hitAreas);
 }
  
 // ===== COMPARE TAB =====
@@ -2066,6 +2575,8 @@ function renderCompare() {
     drawCmpType(agData, colorsUsed);
     drawCmpDetailTable(agData, colorsUsed);
     drawCmpLogs(agData, colorsUsed);
+    // 툴팁 재연결 (차트 재드로우 시마다)
+    ['cmp-bar-chart','cmp-line-chart','cmp-comp-chart','cmp-type-chart'].forEach(id => ctAttach(id));
     // ResizeObserver 등록
     ['cmp-bar-panel','cmp-line-panel','cmp-comp-panel','cmp-type-panel'].forEach(id => {
       const el = document.getElementById(id);
@@ -2121,6 +2632,22 @@ function drawCmpBar(agData, cols) {
     const short = d.ag.length>10?d.ag.slice(0,10)+'…':d.ag;
     ctx.fillText(short, x, H-8);
   });
+ 
+  // ── 툴팁 hit areas ──
+  const hitAreas = agData.map((d,i) => {
+    const x = pad.l + (i+0.5)/agData.length*cW;
+    return {
+      x1:x-bw, x2:x+bw, y1:pad.t, y2:pad.t+cH,
+      title: d.ag,
+      rows:[
+        {color:cols[i], label:'총 방문객', val:d.totalV.toLocaleString()+'명'},
+        {color:'',      label:'예약 건수', val:d.groups+'건'},
+        {color:'',      label:'평균 규모', val:d.avgSize+'명'},
+        {color:'',      label:'어린이',   val:(d.totalV?(d.totalC/d.totalV*100).toFixed(1):0)+'%'},
+      ]
+    };
+  });
+  ctRegister('cmp-bar-chart', hitAreas);
 }
  
 function drawCmpLine(agData, cols, from, to) {
@@ -2185,6 +2712,18 @@ function drawCmpLine(agData, cols, from, to) {
     const short = d.ag.length>12?d.ag.slice(0,12)+'…':d.ag;
     ctx.fillText(short, lx+16, 13);
   });
+ 
+  // ── 툴팁 hit areas (월 단위 수직 슬라이스) ──
+  const sliceW = months.length > 1 ? cW/(months.length-1) : cW;
+  const hitAreas = months.map((m,mi) => {
+    const x = pad.l+(mi/(months.length-1||1))*cW;
+    const rows = agData.map((d,i) => ({
+      color:cols[i], label:d.ag.length>14?d.ag.slice(0,14)+'…':d.ag,
+      val:(d.monthly[m]||0).toLocaleString()+'명'
+    })).filter(r=>r.val!=='0명');
+    return {x1:x-sliceW/2, x2:x+sliceW/2, y1:pad.t, y2:pad.t+cH, title:m, rows};
+  });
+  ctRegister('cmp-line-chart', hitAreas);
 }
  
 function drawCmpComp(agData, cols) {
@@ -2227,6 +2766,18 @@ function drawCmpComp(agData, cols) {
     ctx.fillStyle='#94a3b8';ctx.font='9px Noto Sans KR';ctx.textAlign='left';
     ctx.fillText(c.label, pad.l+i*55+13, 12);
   });
+ 
+  // ── 툴팁 hit areas ──
+  const hitAreas = agData.map((d,gi) => {
+    const cx = pad.l + (gi+0.5)*gw;
+    return {
+      x1:cx-gw/2, x2:cx+gw/2, y1:pad.t, y2:pad.t+cH,
+      title: d.ag,
+      rows: cats.map(c=>({color:c.col, label:c.label, val:d[c.k].toLocaleString()+'명'}))
+        .concat([{color:'', label:'합계', val:d.totalV.toLocaleString()+'명'}])
+    };
+  });
+  ctRegister('cmp-comp-chart', hitAreas);
 }
  
 function drawCmpType(agData, cols) {
@@ -2274,6 +2825,21 @@ function drawCmpType(agData, cols) {
     ctx.fillStyle='#94a3b8';ctx.font='9px Noto Sans KR';ctx.textAlign='left';
     ctx.fillText(c.label, pad.l+i*120+13, 12);
   });
+ 
+  // ── 툴팁 hit areas ──
+  const hitAreas = agData.map((d,gi) => {
+    const cx = pad.l + (gi+0.5)*gw;
+    return {
+      x1:cx-gw/2, x2:cx+gw/2, y1:pad.t, y2:pad.t+cH,
+      title: d.ag,
+      rows: [
+        {color:'#14b8a6', label:'Kindergarten', val:d.kg.toLocaleString()+'명'},
+        {color:'#f97316', label:'School',        val:d.sc.toLocaleString()+'명'},
+        {color:'',        label:'합계',           val:d.totalV.toLocaleString()+'명'},
+      ]
+    };
+  });
+  ctRegister('cmp-type-chart', hitAreas);
 }
  
 function drawCmpDetailTable(agData, cols) {
@@ -2345,6 +2911,8 @@ const _resizeObserver = new ResizeObserver(() => {
     renderDonut();
     renderYearlyChart();
     renderMonthlyChart();
+    renderDirectMonthlyChart();
+    if(directView === 'chart') renderDirectCompare();
     // analytics 패널이 열려있으면 재렌더
     const analytics = document.getElementById('day-analytics');
     if(analytics && analytics.style.display !== 'none') {
