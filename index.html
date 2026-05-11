@@ -441,7 +441,7 @@
   </div>
   <div class="header-right">
     <div class="data-badge">📅 데이터: 2024-09 ~ 2026-05</div>
-    <div class="data-badge">에이전시 <strong style="color:var(--gold)">18개사</strong></div>
+    <div class="data-badge">에이전시 <strong style="color:var(--gold)">19개사</strong></div>
   </div>
 </div>
 
@@ -988,10 +988,10 @@
 <script>
 // ===== DATA =====
 // 데이터 기준일 (파일 업데이트 시 함께 수정)
-const DATA_DATE = '2026-05-01';
+const DATA_DATE = '2026-05-09';
 
 const agencyData = [
-  {name:'Happy Smile', v2024:0, v2025:17957, v2026:5337, r2024:0, r2025:76, r2026:18},
+  {name:'Happy Smile', v2024:0, v2025:17957, v2026:5324, r2024:0, r2025:76, r2026:18},
   {name:'Anh Quân Travel', v2024:0, v2025:4914, v2026:1567, r2024:0, r2025:33, r2026:5},
   {name:'Ms Hiền', v2024:3945, v2025:1108, v2026:468, r2024:41, r2025:13, r2026:6},
   {name:'Kinh Bắc Travel', v2024:0, v2025:759, v2026:2981, r2024:0, r2025:5, r2026:11},
@@ -999,7 +999,7 @@ const agencyData = [
   {name:'Lương Sơn Tour', v2024:0, v2025:1833, v2026:759, r2024:0, r2025:11, r2026:3},
   {name:'Hạnh Phúc Tourism', v2024:0, v2025:1213, v2026:0, r2024:0, r2025:3, r2026:0},
   {name:'Phương Việt Travel', v2024:0, v2025:1101, v2026:0, r2024:0, r2025:1, r2026:0},
-  {name:'Tripify', v2024:0, v2025:580, v2026:298, r2024:0, r2025:8, r2026:4},
+  {name:'Tripify', v2024:0, v2025:580, v2026:375, r2024:0, r2025:8, r2026:6},
   {name:'NewGen', v2024:0, v2025:450, v2026:33, r2024:0, r2025:4, r2026:1},
   {name:'Skill Development', v2024:0, v2025:501, v2026:0, r2024:0, r2025:1, r2026:0},
   {name:'Tân Á', v2024:0, v2025:0, v2026:580, r2024:0, r2025:0, r2026:1},
@@ -1008,10 +1008,11 @@ const agencyData = [
   {name:'Minh Trung', v2024:0, v2025:0, v2026:794, r2024:0, r2025:0, r2026:8},
   {name:'HNTravel', v2024:0, v2025:0, v2026:135, r2024:0, r2025:0, r2026:1},
   {name:'Star Travel', v2024:0, v2025:0, v2026:656, r2024:0, r2025:0, r2026:5},
-  {name:'Vietnam Global', v2024:0, v2025:0, v2026:230, r2024:0, r2025:0, r2026:2},
-  {name:'An Thành Travel', v2024:0, v2025:0, v2026:72, r2024:0, r2025:0, r2026:1},
+  {name:'Vietnam Global', v2024:0, v2025:0, v2026:206, r2024:0, r2025:0, r2026:2},
+  {name:'An Thành Travel', v2024:0, v2025:0, v2026:103, r2024:0, r2025:0, r2026:2},
   {name:'Á Châu Travel', v2024:0, v2025:0, v2026:189, r2024:0, r2025:0, r2026:1},
   {name:'Đông Bắc Travel', v2024:0, v2025:0, v2026:108, r2024:0, r2025:0, r2026:1},
+  {name:'SuperKid', v2024:0, v2025:0, v2026:87, r2024:0, r2025:0, r2026:1},
   {name:'Hùng Vương Travel', v2024:0, v2025:0, v2026:0, r2024:0, r2025:0, r2026:0},
   {name:'Vạn An Travel', v2024:0, v2025:0, v2026:0, r2024:0, r2025:0, r2026:0},
 ];
@@ -1020,11 +1021,11 @@ const agencyData = [
 
 
 const weeklyData = {
-  agencies: ['Happy Smile','Anh Quân Travel','Ms Hiền','Kinh Bắc Travel','Hải Hà Travel','Lương Sơn Tour','Hạnh Phúc Tourism','Phương Việt Travel','Tripify','NewGen','Skill Development','Tân Á','Cánh Buồm Xanh','Đại Khánh','Minh Trung','HNTravel','Star Travel','Vietnam Global','An Thành Travel','Á Châu Travel','Đông Bắc Travel','Hùng Vương Travel','Vạn An Travel'],
+  agencies: ['Happy Smile','Anh Quân Travel','Ms Hiền','Kinh Bắc Travel','Hải Hà Travel','Lương Sơn Tour','Hạnh Phúc Tourism','Phương Việt Travel','Tripify','NewGen','Skill Development','Tân Á','Cánh Buồm Xanh','Đại Khánh','Minh Trung','HNTravel','Star Travel','Vietnam Global','An Thành Travel','Á Châu Travel','Đông Bắc Travel','SuperKid','Hùng Vương Travel','Vạn An Travel'],
   weeks: ['MAR_W1','MAR_W2','MAR_W3','MAR_W4','APR_W1','APR_W2','APR_W3','APR_W4','APR_W5','MAY_W1','MAY_W2','MAY_W3','MAY_W4'],
   weekLabels: ['MAR W1\n02~08 Mar','MAR W2\n09~15 Mar','MAR W3\n16~22 Mar','MAR W4\n23~29 Mar','APR W1\n30 Mar~05 Apr','APR W2\n06~12 Apr','APR W3\n13~19 Apr','APR W4\n20~26 Apr','APR W5\n27 Apr~03 May','MAY W1\n04~10 May','MAY W2\n11~17 May','MAY W3\n18~24 May','MAY W4\n25~31 May'],
   data: {
-    'Happy Smile': [0,0,966,213,1014,787,120,0,0,260,300,980,500],
+    'Happy Smile': [0,0,966,213,1014,787,120,0,0,247,300,980,500],
     'Anh Quân Travel': [452,479,407,0,119,0,110,0,0,0,0,0,0],
     'Ms Hiền': [0,0,0,0,0,105,0,0,0,0,0,0,0],
     'Kinh Bắc Travel': [0,58,0,0,322,1174,509,668,0,0,250,0,0],
@@ -1032,7 +1033,7 @@ const weeklyData = {
     'Lương Sơn Tour': [0,0,0,0,0,622,137,0,0,0,0,0,0],
     'Hạnh Phúc Tourism': [0,0,0,0,0,0,0,0,0,0,0,0,0],
     'Phương Việt Travel': [0,0,0,0,0,0,0,0,0,0,0,0,0],
-    'Tripify': [0,0,145,43,0,0,110,0,0,0,0,0,0],
+    'Tripify': [0,0,145,43,0,0,110,0,0,39,38,0,0],
     'NewGen': [0,0,0,0,0,0,33,0,0,0,0,0,0],
     'Skill Development': [0,0,0,0,0,0,0,0,0,0,0,0,0],
     'Tân Á': [0,0,0,580,0,0,0,0,0,0,0,0,0],
@@ -1041,10 +1042,11 @@ const weeklyData = {
     'Minh Trung': [0,0,0,0,0,36,205,405,0,0,0,0,0],
     'HNTravel': [0,0,0,0,135,0,0,0,0,0,0,0,0],
     'Star Travel': [0,0,0,0,0,172,91,393,0,0,0,0,0],
-    'Vietnam Global': [0,0,0,130,0,0,0,0,0,100,0,0,0],
-    'An Thành Travel': [0,0,0,0,0,72,0,0,0,0,0,0,0],
+    'Vietnam Global': [0,0,0,130,0,0,0,0,0,76,0,0,0],
+    'An Thành Travel': [0,0,0,0,0,72,0,0,0,31,0,0,0],
     'Á Châu Travel': [0,0,0,0,0,0,0,189,0,0,0,0,0],
     'Đông Bắc Travel': [0,0,0,0,0,0,0,108,0,0,0,0,0],
+    'SuperKid': [0,0,0,0,0,0,0,0,0,87,0,0,0],
     'Hùng Vương Travel': [0,0,0,0,0,0,0,0,0,0,0,0,0],
     'Vạn An Travel': [0,0,0,0,0,0,0,0,0,0,0,0,0],
   }
@@ -1319,16 +1321,20 @@ const groupListData = [
   {year:2026,month:4,dov:'2026-04-23',name:'MN Sakura Kids - Long Biên',child:167,adult:34,toddler:0,total:201,type:'Kindergarten',sector:'Public',agency:'Minh Trung'},
   {year:2026,month:4,dov:'2026-04-24',name:'MN Vân Canh B',child:166,adult:23,toddler:0,total:189,type:'Kindergarten',sector:'Public',agency:'Á Châu Travel'},
   {year:2026,month:4,dov:'2026-04-24',name:'MN Tây Đằng',child:85,adult:23,toddler:0,total:108,type:'Kindergarten',sector:'Public',agency:'Đông Bắc Travel'},
-  {year:2026,month:5,dov:'2026-05-07',name:'MN Happy Smile',child:260,adult:0,toddler:0,total:260,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
-  {year:2026,month:5,dov:'2026-05-08',name:'MN Sunshine - Ninh Bình',child:80,adult:20,toddler:0,total:100,type:'Kindergarten',sector:'Public',agency:'Vietnam Global'},
-  {year:2026,month:5,dov:'2026-05-13',name:'Mn Kinh Bắc',child:250,adult:0,toddler:0,total:250,type:'Kindergarten',sector:'Public',agency:'Kinh Bắc Travel'},
-  {year:2026,month:5,dov:'2026-05-15',name:'MN Happy Smile',child:300,adult:0,toddler:0,total:300,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
-  {year:2026,month:5,dov:'2026-05-19',name:'MN Happy Smile',child:260,adult:0,toddler:0,total:260,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
-  {year:2026,month:5,dov:'2026-05-20',name:'MN Happy Smile',child:220,adult:0,toddler:0,total:220,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
-  {year:2026,month:5,dov:'2026-05-21',name:'MN Happy Smile',child:250,adult:0,toddler:0,total:250,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
-  {year:2026,month:5,dov:'2026-05-22',name:'MN Happy Smile',child:250,adult:0,toddler:0,total:250,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
-  {year:2026,month:5,dov:'2026-05-25',name:'MN Happy Smile',child:250,adult:0,toddler:0,total:250,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
-  {year:2026,month:5,dov:'2026-05-27',name:'MN Happy Smile',child:250,adult:0,toddler:0,total:250,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2026,month:5,dov:'2026-05-07',name:'MN Happy Smile 1',child:201,adult:46,toddler:0,total:247,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2026,month:5,dov:'2026-05-07',name:'MN Tây Phong',child:44,adult:43,toddler:0,total:87,type:'Kindergarten',sector:'Public',agency:'SuperKid'},
+  {year:2026,month:5,dov:'2026-05-08',name:'MN Baby House',child:33,adult:6,toddler:0,total:39,type:'Kindergarten',sector:'Private',agency:'Tripify'},
+  {year:2026,month:5,dov:'2026-05-08',name:'MN Z175',child:25,adult:6,toddler:0,total:31,type:'Kindergarten',sector:'Public',agency:'An Thành Travel'},
+  {year:2026,month:5,dov:'2026-05-09',name:'MN Sunshine - Ninh Bình',child:52,adult:24,toddler:0,total:76,type:'Kindergarten',sector:'Public',agency:'Vietnam Global'},
+  {year:2026,month:5,dov:'2026-05-12',name:'MN Ngôi Sao',child:22,adult:16,toddler:0,total:38,type:'Kindergarten',sector:'Private',agency:'Tripify'},
+  {year:2026,month:5,dov:'2026-05-13',name:'Mn Hoa sữa',child:250,adult:0,toddler:0,total:250,type:'Kindergarten',sector:'Public',agency:'Kinh Bắc Travel'},
+  {year:2026,month:5,dov:'2026-05-15',name:'MN Happy Smile 2',child:300,adult:0,toddler:0,total:300,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2026,month:5,dov:'2026-05-19',name:'MN Happy Smile 3',child:260,adult:0,toddler:0,total:260,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2026,month:5,dov:'2026-05-20',name:'MN Happy Smile 4',child:220,adult:0,toddler:0,total:220,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2026,month:5,dov:'2026-05-21',name:'MN Happy Smile 5',child:250,adult:0,toddler:0,total:250,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2026,month:5,dov:'2026-05-22',name:'MN Happy Smile 6',child:250,adult:0,toddler:0,total:250,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2026,month:5,dov:'2026-05-25',name:'MN Happy Smile 7',child:250,adult:0,toddler:0,total:250,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
+  {year:2026,month:5,dov:'2026-05-27',name:'MN Happy Smile 8',child:250,adult:0,toddler:0,total:250,type:'Kindergarten',sector:'Public',agency:'Happy Smile'},
 ];
 
 
@@ -1367,15 +1373,29 @@ const directData = [
   {year:2026,month:5,dov:'2026-05-04',name:'TH Concordia Hanoi',child:37,adult:5,toddler:0,total:42,type:'School',sector:'International'},
   {year:2026,month:5,dov:'2026-05-04',name:'MN Lahlah',child:47,adult:10,toddler:0,total:57,type:'Kindergarten',sector:'International'},
   {year:2026,month:5,dov:'2026-05-04',name:'MN Phenikaa',child:31,adult:6,toddler:0,total:37,type:'Kindergarten',sector:'Private'},
-  {year:2026,month:5,dov:'2026-05-06',name:'MN FIS Cầu Giấy',child:75,adult:18,toddler:0,total:93,type:'Kindergarten',sector:'Private'},
-  {year:2026,month:5,dov:'2026-05-10',name:'Lớp 1P2 TH Marie Curie',child:34,adult:6,toddler:0,total:40,type:'School',sector:'Private'},
+  {year:2026,month:5,dov:'2026-05-06',name:'MN FIS Cầu Giấy',child:74,adult:19,toddler:0,total:93,type:'Kindergarten',sector:'Private'},
+  {year:2026,month:5,dov:'2026-05-10',name:'Lớp 1P2 TH Marie Curie',child:36,adult:17,toddler:0,total:53,type:'School',sector:'Private'},
   {year:2026,month:5,dov:'2026-05-12',name:'Lớp 2P2 - TH Marie Curie',child:30,adult:5,toddler:0,total:35,type:'School',sector:'Private'},
   {year:2026,month:5,dov:'2026-05-12',name:'Lớp 2G - TH Marie Curie',child:22,adult:4,toddler:0,total:26,type:'School',sector:'Private'},
   {year:2026,month:5,dov:'2026-05-12',name:'Lớp 1G - TH Marie Curie',child:28,adult:5,toddler:0,total:33,type:'School',sector:'Private'},
+  {year:2026,month:5,dov:'2026-05-12',name:'Lớp 1P1 - TH Marie Curie',child:32,adult:0,toddler:0,total:32,type:'School',sector:'Private'},
+  {year:2026,month:5,dov:'2026-05-12',name:'MN Creative House',child:55,adult:10,toddler:15,total:80,type:'Kindergarten',sector:'Private'},
+  {year:2026,month:5,dov:'2026-05-14',name:'Mn Thượng Cát',child:200,adult:0,toddler:0,total:200,type:'Kindergarten',sector:'Public'},
   {year:2026,month:5,dov:'2026-05-15',name:'MN Khu Vườn Nhỏ',child:35,adult:7,toddler:0,total:42,type:'Kindergarten',sector:'Private'},
+  {year:2026,month:5,dov:'2026-05-15',name:'MN Fairy House',child:110,adult:0,toddler:0,total:110,type:'Kindergarten',sector:'Private'},
+  {year:2026,month:5,dov:'2026-05-15',name:'TH Marie Curie - Lớp 4',child:32,adult:0,toddler:0,total:32,type:'School',sector:'Private'},
+  {year:2026,month:5,dov:'2026-05-16',name:'Max Group',child:20,adult:4,toddler:0,total:24,type:'Corporate',sector:'Other (Corporate, academy etc)'},
+  {year:2026,month:5,dov:'2026-05-17',name:'TH Ngôi Sao Hoàng Mai - Lớp 1',child:37,adult:0,toddler:0,total:37,type:'School',sector:'Private'},
+  {year:2026,month:5,dov:'2026-05-18',name:'MN Green Stars',child:30,adult:7,toddler:0,total:37,type:'Kindergarten',sector:'Private'},
+  {year:2026,month:5,dov:'2026-05-18',name:'TH Vũ Công Tể',child:110,adult:0,toddler:0,total:110,type:'School',sector:'Public'},
+  {year:2026,month:5,dov:'2026-05-19',name:'MN Kids Home (dự kiến 80C)',child:60,adult:20,toddler:0,total:80,type:'Kindergarten',sector:'Private'},
+  {year:2026,month:5,dov:'2026-05-20',name:'MN Pony',child:60,adult:0,toddler:0,total:60,type:'Kindergarten',sector:'Private'},
+  {year:2026,month:5,dov:'2026-05-21',name:'MN Sao Khuê',child:60,adult:0,toddler:0,total:60,type:'Kindergarten',sector:'Private'},
   {year:2026,month:5,dov:'2026-05-22',name:'MN Baby Bear',child:32,adult:10,toddler:20,total:62,type:'Kindergarten',sector:'Private'},
+  {year:2026,month:5,dov:'2026-05-22',name:'Lớp nhỏ Aflred Nobel',child:30,adult:0,toddler:0,total:30,type:'School',sector:'Private'},
+  {year:2026,month:5,dov:'2026-05-22',name:'Lớp 2A15 TH Lê Quý Đôn',child:30,adult:0,toddler:0,total:30,type:'School',sector:'Private'},
   {year:2026,month:5,dov:'2026-05-25',name:'MN Himawari',child:37,adult:10,toddler:0,total:47,type:'Kindergarten',sector:'Private'},
-  {year:2026,month:5,dov:'2026-05-26',name:'TH Reigrate Grammar',child:28,adult:4,toddler:0,total:32,type:'School',sector:'International'},
+  {year:2026,month:5,dov:'2026-05-26',name:'TH Reigrate Grammar',child:27,adult:4,toddler:0,total:31,type:'School',sector:'International'},
   {year:2026,month:5,dov:'2026-05-26',name:'MN Hoa Lộc Vừng',child:50,adult:30,toddler:0,total:80,type:'Kindergarten',sector:'Private'},
   {year:2026,month:5,dov:'2026-05-27',name:'MN Ngọc Minh',child:50,adult:20,toddler:0,total:70,type:'Kindergarten',sector:'Private'},
   {year:2026,month:5,dov:'2026-05-28',name:'MN Home Schooling',child:30,adult:10,toddler:0,total:40,type:'Kindergarten',sector:'Private'},
@@ -1797,8 +1817,8 @@ function setView(v) {
 function updateThisNextWeek() {
   let tw = 0, nw = 0;
   weeklyData.agencies.forEach(a => {
-    tw += weeklyData.data[a][8]||0;
-    nw += weeklyData.data[a][9]||0;
+    tw += weeklyData.data[a][9]||0;
+    nw += weeklyData.data[a][10]||0;
   });
   document.getElementById('thisweek-val').textContent = tw.toLocaleString();
   document.getElementById('nextweek-val').textContent = nw.toLocaleString();
@@ -1817,7 +1837,7 @@ function renderWeekly() {
     
     let thead = '<tr><th>에이전시</th>';
     weeks.forEach((w,i) => {
-      const isThis = i===8, isNext = i===9;
+      const isThis = i===9, isNext = i===10;
       thead += `<th class="${isThis?'this-week-col':isNext?'next-week-col':''} weekly-col" style="text-align:right;font-size:9px">${w.replace('_',' ')}</th>`;
     });
     thead += '<th style="text-align:right">합계</th></tr>';
@@ -1830,7 +1850,7 @@ function renderWeekly() {
       if(total === 0 && agFilter === 'all') return;
       tbody += `<tr><td style="font-weight:600">${ag}</td>`;
       vals.forEach((v,i) => {
-        const isThis = i===8, isNext = i===9;
+        const isThis = i===9, isNext = i===10;
         tbody += `<td class="num ${isThis?'this-week-col':isNext?'next-week-col':''}">${v>0?v.toLocaleString():'-'}</td>`;
       });
       tbody += `<td class="num" style="font-weight:700;color:var(--text)">${total.toLocaleString()}</td></tr>`;
@@ -1840,7 +1860,7 @@ function renderWeekly() {
     tbody += '<tr style="background:rgba(59,130,246,0.06);font-weight:700"><td>합계</td>';
     weeks.forEach((w,i) => {
       const total = agencies.reduce((s,ag) => s+((weeklyData.data[ag]||[])[i]||0), 0);
-      const isThis = i===8, isNext = i===9;
+      const isThis = i===9, isNext = i===10;
       tbody += `<td class="num ${isThis?'this-week-col':isNext?'next-week-col':''}" style="color:var(--accent2)">${total>0?total.toLocaleString():'-'}</td>`;
     });
     const grandTotal = agencies.reduce((s,ag) => s+(weeklyData.data[ag]||[]).reduce((ss,v)=>ss+v,0), 0);
@@ -2244,8 +2264,8 @@ const directWeeks = [
   {name:'MAY W3', label:'18~24 May', start:'2026-05-18', end:'2026-05-24'},
   {name:'MAY W4', label:'25~31 May', start:'2026-05-25', end:'2026-05-31'},
 ];
-const DIRECT_THIS_WEEK = 8;
-const DIRECT_NEXT_WEEK = 9;
+const DIRECT_THIS_WEEK = 9;
+const DIRECT_NEXT_WEEK = 10;
 
 let directView = 'date';
 function setDirectView(v) {
