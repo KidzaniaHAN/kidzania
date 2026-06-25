@@ -988,7 +988,7 @@
 <script>
 // ===== DATA =====
 // 데이터 기준일 (파일 업데이트 시 함께 수정)
-const DATA_DATE = '2026-06-12';
+const DATA_DATE = '2026-06-19';
 
 const agencyData = [
   {name:'Happy Smile', v2024:0, v2025:17957, v2026:4815, r2024:0, r2025:76, r2026:17},
@@ -1005,7 +1005,7 @@ const agencyData = [
   {name:'Tân Á', v2024:0, v2025:0, v2026:580, r2024:0, r2025:0, r2026:1},
   {name:'Cánh Buồm Xanh', v2024:0, v2025:0, v2026:310, r2024:0, r2025:0, r2026:1},
   {name:'Đại Khánh', v2024:0, v2025:0, v2026:149, r2024:0, r2025:0, r2026:1},
-  {name:'Minh Trung', v2024:0, v2025:0, v2026:882, r2024:0, r2025:0, r2026:10},
+  {name:'Minh Trung', v2024:0, v2025:0, v2026:1036, r2024:0, r2025:0, r2026:12},
   {name:'HNTravel', v2024:0, v2025:0, v2026:135, r2024:0, r2025:0, r2026:1},
   {name:'Star Travel', v2024:0, v2025:0, v2026:656, r2024:0, r2025:0, r2026:5},
   {name:'Vietnam Global', v2024:0, v2025:0, v2026:206, r2024:0, r2025:0, r2026:2},
@@ -1039,7 +1039,7 @@ const weeklyData = {
     'Tân Á': [0,0,0,580,0,0,0,0,0,0,0,0,0,0,0,0,0],
     'Cánh Buồm Xanh': [0,0,0,310,0,0,0,0,0,0,0,0,0,0,0,0,0],
     'Đại Khánh': [0,0,149,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    'Minh Trung': [0,0,0,0,0,36,205,405,0,0,0,46,0,42,0,0,0],
+    'Minh Trung': [0,0,0,0,0,36,205,405,0,0,0,46,0,42,0,54,100],
     'HNTravel': [0,0,0,0,135,0,0,0,0,0,0,0,0,0,0,0,0],
     'Star Travel': [0,0,0,0,0,172,91,393,0,0,0,0,0,0,0,0,0],
     'Vietnam Global': [0,0,0,130,0,0,0,0,0,76,0,0,0,0,0,0,0],
@@ -1340,6 +1340,8 @@ const groupListData = [
   {year:2026,month:5,dov:'2026-05-29',name:'MN Ngôi nhà tuổi thơ',child:25,adult:5,toddler:0,total:30,type:'Kindergarten',sector:'Private',agency:'Ms Hiền'},
   {year:2026,month:5,dov:'2026-05-29',name:'TH Tràng An',child:34,adult:13,toddler:0,total:47,type:'School',sector:'Public',agency:'Tripify'},
   {year:2026,month:6,dov:'2026-06-04',name:'MN Xứ Sở Thần Tiên',child:34,adult:8,toddler:0,total:42,type:'Kindergarten',sector:'Public',agency:'Minh Trung'},
+  {year:2026,month:6,dov:'2026-06-19',name:'MN Phương Anh',child:39,adult:15,toddler:0,total:54,type:'Kindergarten',sector:'Public',agency:'Minh Trung'},
+  {year:2026,month:6,dov:'2026-06-23',name:'MN Evergrin ',child:100,adult:0,toddler:0,total:100,type:'Kindergarten',sector:'Public',agency:'Minh Trung'},
 ];
 
 
@@ -1468,23 +1470,30 @@ const directData = [
   {year:2026,month:6,dov:'2026-06-11',name:'MN Angel Kindergatern',child:103,adult:25,toddler:0,total:128,type:'Kindergarten',sector:'Private'},
   {year:2026,month:6,dov:'2026-06-11',name:'TTTA Wordplay',child:23,adult:4,toddler:0,total:27,type:'Academy',sector:'Other (Corporate, academy etc)'},
   {year:2026,month:6,dov:'2026-06-11',name:'MN Chip chip',child:28,adult:4,toddler:0,total:32,type:'Kindergarten',sector:'Private'},
-  {year:2026,month:6,dov:'2026-06-12',name:'Wellspring',child:202,adult:34,toddler:0,total:236,type:'School',sector:'Private'},
-  {year:2026,month:6,dov:'2026-06-12',name:'MN Olympia',child:40,adult:0,toddler:20,total:60,type:'Kindergarten',sector:'Private'},
-  {year:2026,month:6,dov:'2026-06-13',name:'TH JIS - Lớp C2.1',child:18,adult:14,toddler:0,total:32,type:'School',sector:'International'},
-  {year:2026,month:6,dov:'2026-06-16',name:'MN Baby Sun - Đông Anh',child:60,adult:0,toddler:0,total:60,type:'Kindergarten',sector:'Private'},
-  {year:2026,month:6,dov:'2026-06-17',name:'TT Giáo dục Đông Dương',child:25,adult:0,toddler:0,total:25,type:'Academy',sector:'Other (Corporate, academy etc)'},
-  {year:2026,month:6,dov:'2026-06-18',name:'MN SOL',child:40,adult:0,toddler:0,total:40,type:'Kindergarten',sector:'Private'},
-  {year:2026,month:6,dov:'2026-06-18',name:'Sungwoo Vina',child:89,adult:18,toddler:0,total:107,type:'Corporate',sector:'Other (Corporate, academy etc)'},
-  {year:2026,month:6,dov:'2026-06-19',name:'Happiness Edu',child:25,adult:0,toddler:0,total:25,type:'Academy',sector:'Other (Corporate, academy etc)'},
-  {year:2026,month:6,dov:'2026-06-19',name:'TH Archimedes',child:85,adult:0,toddler:0,total:85,type:'School',sector:'Private'},
+  {year:2026,month:6,dov:'2026-06-12',name:'Wellspring',child:186,adult:34,toddler:0,total:220,type:'School',sector:'Private'},
+  {year:2026,month:6,dov:'2026-06-12',name:'Lớp cô Quỳnh',child:10,adult:10,toddler:0,total:20,type:'School',sector:'Private'},
+  {year:2026,month:6,dov:'2026-06-12',name:'MN Olympia',child:37,adult:94,toddler:14,total:145,type:'Kindergarten',sector:'Private'},
+  {year:2026,month:6,dov:'2026-06-13',name:'TH JIS - Lớp C2.1',child:17,adult:15,toddler:1,total:33,type:'School',sector:'International'},
+  {year:2026,month:6,dov:'2026-06-16',name:'MN Baby Sun - Đông Anh',child:130,adult:17,toddler:0,total:147,type:'Kindergarten',sector:'Private'},
+  {year:2026,month:6,dov:'2026-06-17',name:'TT Giáo dục Đông Dương',child:22,adult:4,toddler:0,total:26,type:'Academy',sector:'Other (Corporate, academy etc)'},
+  {year:2026,month:6,dov:'2026-06-17',name:'MN Baby Einstein',child:143,adult:21,toddler:0,total:164,type:'Kindergarten',sector:'Private'},
+  {year:2026,month:6,dov:'2026-06-18',name:'MN Big House',child:40,adult:7,toddler:0,total:47,type:'Kindergarten',sector:'Private'},
+  {year:2026,month:6,dov:'2026-06-18',name:'TH Archimedes - Đông Anh',child:163,adult:27,toddler:0,total:190,type:'School',sector:'Private'},
+  {year:2026,month:6,dov:'2026-06-18',name:'Sungwoo Vina',child:88,adult:18,toddler:0,total:106,type:'Corporate',sector:'Other (Corporate, academy etc)'},
+  {year:2026,month:6,dov:'2026-06-18',name:'Jungle Kids Club',child:22,adult:3,toddler:0,total:25,type:'Academy',sector:'Other (Corporate, academy etc)'},
+  {year:2026,month:6,dov:'2026-06-19',name:'Happiness Edu',child:29,adult:5,toddler:0,total:34,type:'Academy',sector:'Other (Corporate, academy etc)'},
+  {year:2026,month:6,dov:'2026-06-19',name:'TH Archimedes - Cầu Giấy',child:97,adult:19,toddler:0,total:116,type:'School',sector:'Private'},
   {year:2026,month:6,dov:'2026-06-23',name:'ISPH',child:19,adult:0,toddler:0,total:19,type:'School',sector:'International'},
-  {year:2026,month:6,dov:'2026-06-23',name:'MN Baby Einstein (dự kiến 150)',child:100,adult:0,toddler:0,total:100,type:'Kindergarten',sector:'Private'},
-  {year:2026,month:6,dov:'2026-06-24',name:'SIS - Lớp L',child:34,adult:0,toddler:0,total:34,type:'School',sector:'Private'},
-  {year:2026,month:6,dov:'2026-06-24',name:'Vinschool Summer Camp 97C',child:97,adult:0,toddler:0,total:97,type:'School',sector:'Private'},
+  {year:2026,month:6,dov:'2026-06-24',name:'SIS - Lớp L',child:33,adult:0,toddler:0,total:33,type:'School',sector:'Private'},
+  {year:2026,month:6,dov:'2026-06-24',name:'Vinschool Summer Camp - Ocean Park + Harmony',child:97,adult:25,toddler:0,total:122,type:'School',sector:'Private'},
+  {year:2026,month:6,dov:'2026-06-24',name:'Vinschool Summer Camp - Metropolis',child:53,adult:10,toddler:0,total:63,type:'School',sector:'Private'},
   {year:2026,month:6,dov:'2026-06-25',name:'TH Brendon',child:130,adult:0,toddler:0,total:130,type:'School',sector:'Private'},
   {year:2026,month:6,dov:'2026-06-25',name:'MN Việt Úc',child:20,adult:3,toddler:0,total:23,type:'Kindergarten',sector:'Private'},
+  {year:2026,month:6,dov:'2026-06-25',name:'MN Happy Garden',child:30,adult:0,toddler:0,total:30,type:'Kindergarten',sector:'Private'},
   {year:2026,month:6,dov:'2026-06-26',name:'Công ty Mỹ Thanh',child:16,adult:14,toddler:0,total:30,type:'Corporate',sector:'Other (Corporate, academy etc)'},
   {year:2026,month:6,dov:'2026-06-26',name:'MN cô Hiền',child:70,adult:0,toddler:0,total:70,type:'Kindergarten',sector:'Private'},
+  {year:2026,month:6,dov:'2026-06-26',name:'MN Grit',child:42,adult:10,toddler:23,total:75,type:'Kindergarten',sector:'Private'},
+  {year:2026,month:6,dov:'2026-06-27',name:'Stanford English',child:70,adult:0,toddler:0,total:70,type:'Academy',sector:'Other (Corporate, academy etc)'},
   {year:2026,month:6,dov:'2026-06-28',name:'FPT Edu',child:700,adult:700,toddler:0,total:1400,type:'Corporate',sector:'Other (Corporate, academy etc)'},
   {year:2026,month:6,dov:'2026-06-30',name:'Trung tâm Tiếng Anh Lime',child:30,adult:0,toddler:0,total:30,type:'Academy',sector:'Other (Corporate, academy etc)'},
 ];
@@ -1904,8 +1913,8 @@ function setView(v) {
 function updateThisNextWeek() {
   let tw = 0, nw = 0;
   weeklyData.agencies.forEach(a => {
-    tw += weeklyData.data[a][14]||0;
-    nw += weeklyData.data[a][15]||0;
+    tw += weeklyData.data[a][15]||0;
+    nw += weeklyData.data[a][16]||0;
   });
   document.getElementById('thisweek-val').textContent = tw.toLocaleString();
   document.getElementById('nextweek-val').textContent = nw.toLocaleString();
@@ -1924,7 +1933,7 @@ function renderWeekly() {
     
     let thead = '<tr><th>에이전시</th>';
     weeks.forEach((w,i) => {
-      const isThis = i===14, isNext = i===15;
+      const isThis = i===15, isNext = i===16;
       thead += `<th class="${isThis?'this-week-col':isNext?'next-week-col':''} weekly-col" style="text-align:right;font-size:9px">${w.replace('_',' ')}</th>`;
     });
     thead += '<th style="text-align:right">합계</th></tr>';
@@ -1937,7 +1946,7 @@ function renderWeekly() {
       if(total === 0 && agFilter === 'all') return;
       tbody += `<tr><td style="font-weight:600">${ag}</td>`;
       vals.forEach((v,i) => {
-        const isThis = i===14, isNext = i===15;
+        const isThis = i===15, isNext = i===16;
         tbody += `<td class="num ${isThis?'this-week-col':isNext?'next-week-col':''}">${v>0?v.toLocaleString():'-'}</td>`;
       });
       tbody += `<td class="num" style="font-weight:700;color:var(--text)">${total.toLocaleString()}</td></tr>`;
@@ -1947,7 +1956,7 @@ function renderWeekly() {
     tbody += '<tr style="background:rgba(59,130,246,0.06);font-weight:700"><td>합계</td>';
     weeks.forEach((w,i) => {
       const total = agencies.reduce((s,ag) => s+((weeklyData.data[ag]||[])[i]||0), 0);
-      const isThis = i===14, isNext = i===15;
+      const isThis = i===15, isNext = i===16;
       tbody += `<td class="num ${isThis?'this-week-col':isNext?'next-week-col':''}" style="color:var(--accent2)">${total>0?total.toLocaleString():'-'}</td>`;
     });
     const grandTotal = agencies.reduce((s,ag) => s+(weeklyData.data[ag]||[]).reduce((ss,v)=>ss+v,0), 0);
@@ -2355,8 +2364,8 @@ const directWeeks = [
   {name:'JUN W3', label:'15~21 Jun', start:'2026-06-15', end:'2026-06-21'},
   {name:'JUN W4', label:'22~28 Jun', start:'2026-06-22', end:'2026-06-28'},
 ];
-const DIRECT_THIS_WEEK = 14;
-const DIRECT_NEXT_WEEK = 15;
+const DIRECT_THIS_WEEK = 15;
+const DIRECT_NEXT_WEEK = 16;
 
 let directView = 'date';
 function setDirectView(v) {
